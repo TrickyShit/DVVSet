@@ -3,23 +3,24 @@
 // provides a container for a set of concurrent values (siblings) with causal
 // order information.
 // 
+
+using System;
 using NCalc;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DVVSet
 {
-    
-    using Number = Numbers.Number;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Linq;
-    
-    public static class Module {
+    public static class DVVdotnet {
         
         // 
         //     Erlang's implementation of lists:foldl/3
         //     
-        public static object foldl(object func, object acc, object xs) {
-            var result = functools.reduce(func, reversed(xs), acc);
+        public static Clock Foldl(object func, object acc, string[] xs) 
+        {
+            var xsReversed = xs.Reverse().ToArray();
+            var result = func.Aggregate(xsReversed, acc);  //TODO разобраться со сверткой в Питоне/Эрланге и сделать аналог
             return result;
         }
         
@@ -28,13 +29,13 @@ namespace DVVSet
         //     ( list > string )
         //     
         public static object cmp_fun(object a, object b) {
-            if (a is str && b is str) {
+            if (a is string && b is string) {
                 return a > b;
             }
-            if (a is Number && b is Number) {
+            if (a is int && b is int) {
                 return a > b;
             }
-            if (a is list && b is list) {
+            if (a is Enumerable && b is Enumerable) {
                 if (a.Count > 0 && b.Count > 0) {
                     if (a[0] is list && b[0] is list) {
                         return a[0].Count > b[0].Count;
