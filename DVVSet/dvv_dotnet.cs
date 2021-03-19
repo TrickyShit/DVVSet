@@ -5,7 +5,7 @@
 // 
 
 using System;
-using NCalc;
+//using NCalc;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,31 +13,57 @@ using System.Linq;
 namespace DVVSet
 {
     public static class DVVdotnet {
-        
+        public static bool IsNumeric(this object obj)       //Implementation of Number class (Python, Java)
+        {
+            if (obj == null) return false;
+
+            switch (obj)
+            {
+                case sbyte _: return true;
+                case byte _: return true;
+                case short _: return true;
+                case ushort _: return true;
+                case int _: return true;
+                case uint _: return true;
+                case long _: return true;
+                case ulong _: return true;
+                case float _: return true;
+                case double _: return true;
+                case decimal _: return true;
+                default: return false;
+            }
+        }
         // 
         //     Erlang's implementation of lists:foldl/3
         //     
         public static Clock Foldl(object func, object acc, string[] xs) 
         {
-            var xsReversed = xs.Reverse().ToArray();
-            var result = func.Aggregate(xsReversed, acc);  //TODO разобраться со сверткой в Питоне/Эрланге и сделать аналог
+            var result = xs.Reverse().Aggregate(acc, func);  //TODO разобраться со сверткой в Питоне/Эрланге и сделать аналог
             return result;
         }
         
         // 
         //     Allows to compare lists with strings, as in Erlang.
         //     ( list > string )
-        //     
-        public static object cmp_fun(object a, object b) {
+        //
+        public static bool IsList(object o)     //проверка на принадлежность объекта о к типу данных List
+        {
+            if (o == null) return false;
+            return o is IList
+                   && o.GetType().IsGenericType
+                   && o.GetType().GetGenericTypeDefinition().IsAssignableFrom(typeof(List<>));
+        }
+        public static object Cmp_fun(object a, object b) {
             if (a is string && b is string) {
-                return a > b;
+                return a.Equals(b);
             }
-            if (a is int && b is int) {
-                return a > b;
+            if (IsNumeric(a)==true&&IsNumeric(b)==true){
+                return a.Equals(b);
             }
-            if (a is Enumerable && b is Enumerable) {
-                if (a.Count > 0 && b.Count > 0) {
-                    if (a[0] is list && b[0] is list) {
+            if (IsList(a)==true && IsList(b)==true) {
+                var a1=a[0];
+                if (a.ElementAt(0)>0 && b!=null) {
+                    if (IsNumeric(a[0])==true&&IsNumeric(b[0])==true) {
                         return a[0].Count > b[0].Count;
                     }
                     if (a[0] is list) {
