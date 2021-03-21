@@ -12,34 +12,27 @@ using System.Linq;
 
 namespace DVVSet
 {
-    public static class DVVdotnet {
+    public static class DVVdotnet 
+    {
         public static bool IsNumeric(this object obj)       //Implementation of Number class (Python, Java)
         {
             if (obj == null) return false;
 
-            switch (obj)
+            return obj switch
             {
-                case sbyte _: return true;
-                case byte _: return true;
-                case short _: return true;
-                case ushort _: return true;
-                case int _: return true;
-                case uint _: return true;
-                case long _: return true;
-                case ulong _: return true;
-                case float _: return true;
-                case double _: return true;
-                case decimal _: return true;
-                default: return false;
-            }
-        }
-        // 
-        //     Erlang's implementation of lists:foldl/3
-        //     
-        public static Clock Foldl(object func, object acc, string[] xs) 
-        {
-            var result = xs.Reverse().Aggregate(acc, func);  //TODO разобраться со сверткой в Питоне/Эрланге и сделать аналог
-            return result;
+                sbyte _ => true,
+                byte _ => true,
+                short _ => true,
+                ushort _ => true,
+                int _ => true,
+                uint _ => true,
+                long _ => true,
+                ulong _ => true,
+                float _ => true,
+                double _ => true,
+                decimal _ => true,
+                _ => false,
+            };
         }
         
         // 
@@ -53,7 +46,7 @@ namespace DVVSet
                    && o.GetType().IsGenericType
                    && o.GetType().GetGenericTypeDefinition().IsAssignableFrom(typeof(List<>));
         }
-        public static object Cmp_fun(object a, object b) {
+        public static object cmp_fun(object a, object b) {
             if (a is string && b is string) {
                 return a.Equals(b);
             }
@@ -66,7 +59,7 @@ namespace DVVSet
                     if (IsNumeric(a[0])==true&&IsNumeric(b[0])==true) {
                         return a[0].Count > b[0].Count;
                     }
-                    if (a[0] is list) {
+                    if (a[0] is List) {
                         return true;
                     }
                 }
@@ -196,11 +189,16 @@ namespace DVVSet
             //         Synchronizes a list of clocks using _sync().
             //         It discards (causally) outdated values, while merging all causal histories.
             //         
-            public virtual object sync(object clock = Clock) {
-                return foldl(this._sync, new List<object>(), clock);
+            public virtual Clock sync(object clock = Clock) 
+            {
+                // 
+                //     Erlang's implementation of lists:foldl/3
+                //     
+                Clock Foldl(Func<object, object> _sync, string[] xs, Clock acc) => xs.Reverse().Aggregate(acc, _sync); //TODO разобраться со сверткой в Питоне/Эрланге и сделать аналог
+                return Foldl(this._sync, new List<object>(), clock);
             }
             
-            public virtual object _sync(object clock1, object clock2) {
+            public virtual Clock _sync(Clock clock1, Clock clock2) {
                 if (!clock1) {
                     return clock2;
                 }
