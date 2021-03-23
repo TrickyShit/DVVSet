@@ -73,27 +73,8 @@ namespace DVVSet
             return a.Count > b.Count;
         }
         
-        // 
-        //     Vector object for type reference.
-        //     
-        public class Vector
-            : list {
-            
-            public override object ToString() {
-                return "Vector {}".format(this.ToString());
-            }
-        }
         
-        // 
-        //     Entries object for type reference.
-        //     
-        public class Entries
-            : list {
-            
-            public override object ToString() {
-                return "Entries {}".format(this.ToString());
-            }
-        }
+
         
         // 
         //     Clock object.

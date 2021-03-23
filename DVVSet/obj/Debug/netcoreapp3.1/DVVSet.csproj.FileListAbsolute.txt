@@ -1,0 +1,4 @@
+C:\Users\trick\Source\Repos\DVVSet\DVVSet\obj\Debug\netcoreapp3.1\DVVSet.csprojAssemblyReference.cache
+C:\Users\trick\Source\Repos\DVVSet\DVVSet\obj\Debug\netcoreapp3.1\DVVSet.AssemblyInfoInputs.cache
+C:\Users\trick\Source\Repos\DVVSet\DVVSet\obj\Debug\netcoreapp3.1\DVVSet.AssemblyInfo.cs
+C:\Users\trick\Source\Repos\DVVSet\DVVSet\obj\Debug\netcoreapp3.1\DVVSet.csproj.CoreCompileInputs.cache
