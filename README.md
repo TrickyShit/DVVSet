@@ -1,25 +1,13 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% STRUCTURE  
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
-Erlang  
   
--type dvv() :: {vector(), dot()} | {}.  
--type vector() :: [dot()].  
--type dot() :: {id(), {counter(), timestamp()}} | null.  
-  
--type id() :: term().  
--type counter() :: integer().  
--type timestamp() :: integer().  
-  
-C#  
-  
-dvv - кортеж (vector, dot)  
-vector - массив [dot]  
-dotwithid - кортеж (id, dot)  
-dot - Dictionary (counter, timestamp)  
-  
-counter - тип int  
-timestamp - тип int  
-id - тип string? (тип term в Erlang - типа любой)  
-
+clock()         :: {entries(), values()}.
+vector()        :: [{id(), counter(), logical_time()}].
+entries()       :: [{id(), counter(), values(), logical_time()}].
+id()            :: any().
+values()        :: [value()].
+value()         :: any().
+counter()       :: non_neg_integer().
+logical_time()  :: pos_integer().

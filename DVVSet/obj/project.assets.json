@@ -41,11 +41,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\trick\\Source\\Repos\\DVVSet\\DVVSet\\DVVSet.csproj",
+      "projectUniqueName": "C:\\Users\\trick\\source\\repos\\DVVSet\\DVVSet\\DVVSet.csproj",
       "projectName": "DVVSet",
-      "projectPath": "C:\\Users\\trick\\Source\\Repos\\DVVSet\\DVVSet\\DVVSet.csproj",
+      "projectPath": "C:\\Users\\trick\\source\\repos\\DVVSet\\DVVSet\\DVVSet.csproj",
       "packagesPath": "C:\\Users\\trick\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\trick\\Source\\Repos\\DVVSet\\DVVSet\\obj\\",
+      "outputPath": "C:\\Users\\trick\\source\\repos\\DVVSet\\DVVSet\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
