@@ -18,22 +18,8 @@ namespace DVVSet
         {
         }
 
-        /*
-        * Constructs a new clock set without causal history,
-        * and receives one value that goes to the anonymous list.
-        */
-        public Clock NewDvv(string value)
-        {
-            List<string> values = new List<string>{value};
-            return new Clock(values);
-        }
 
-        //Same as new, but receives a list of values, instead of a single value.
-        public Clock NewList(List<string> values)=>new Clock(values);
-
-
-
-        public bool IsNumeric(object obj)       //Implementation of Number class (Python, Java)
+        public bool IsNumeric(object obj)       //Implementation of Number class (Python, Java). If object is numeric => return true.
         {
             if (obj == null) return false;
 

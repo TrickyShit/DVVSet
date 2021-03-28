@@ -5,59 +5,116 @@
 // 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DVVSet
 {
-    public class Clock      //{entries(), values()}
+    public class Clock//{entries(), values()}
     {
-        public List<Entries> Entries{ get; set; }
-        public List<string> Values{ get; set; }
+        private List<Entries> Entries { get; }
+        private List<string> Values { get; }
 
-        public Clock(){ }
+        public Clock() { }
 
-        public Clock(List<Entries> entries, List<string> values)
+        private Clock(List<Entries> entries, List<string> values)
         {
-            Entries=entries;
-            Values=values;
-        }
-
-        public Clock(List<string> values)
-        {
-            Entries = null;
+            Entries = entries;
             Values = values;
         }
 
-        public override int GetHashCode() => HashCode.Combine(Entries, Values);
-
-        public override bool Equals(object obj)
+        private Clock(List<string> values)
         {
-            return base.Equals(obj);
+            Entries = new List<Entries>();
+            Values = values;
         }
 
-        public override string ToString()
+        public Clock(string value)
         {
-            return base.ToString();
+            Entries = new List<Entries>();
+            Values = new List<string> { value };
         }
+
+        /*
+        * Constructs a new clock set without causal history,
+        * and receives one value or list of values that goes to the anonymous list.
+        */
+        public Clock NewList(List<string> values) => new Clock(values);
+        public Clock NewList(string value) => new Clock(value);
+
+        /* Advances the causal history with the given id.
+        * The new value is the *anonymous dot* of the clock.
+        * The client clock SHOULD BE a direct result of method NewList.
+        */
+        public Clock Create(Clock clock, string theId)
+        {
+            var value = clock.Values;
+            List<Entries> result = Entry(clock.Entries, theId, value);
+            return new Clock(result, new List<string>());
+        }
+        public List<Entries> Entry(List<Entries> vector, string theId, List<string> value)
+        {
+            List<Entries> result = new List<Entries>();
+            (string vectorId, int counter, List<string> oldvalues) = vector[0];
+            if (!vector.Any())
+            {
+                var res = new Vector
+                {
+                    Id = theId,
+                    Counter = 1,
+                    Values = value,
+                };
+                result[0] = res;
+                return result;
+            }
+            if (vector[0].Equals(result[0]))
+            {
+                if (vectorId.Equals(theId))
+                {
+                    var newvalues = value;
+                    newvalues.AddRange(oldvalues);
+                    var res = new Vector
+                    {
+                        Id = vectorId,
+                        Counter = counter + 1,
+                        Values = newvalues
+                    };
+                    result[0] = res;
+                    return result;
+                }
+                else
+                {
+                    var i = vectorId.CompareTo(theId);
+                    if (i > 0)
+                    {
+                        var res = new Vector
+                        {
+                            Id = theId,
+                            Counter = 1,
+                            Values = value
+                        };
+                        result[0] = res;
+                        foreach (var v in vector)
+                        {
+                            if (!v.Equals(vector[0]))
+                            {
+                                result.Add(v);
+                            }
+                        }
+                        return result;
+                    }
+                }
+            }
+            result.Add(vector[0]);
+            var eventValue = vector;
+            eventValue.RemoveAt(0);
+            var eventV = Entry(eventValue, theId, value);
+            result.AddRange(eventV);
+            return result;
+        }
+
+
+        public override int GetHashCode() => HashCode.Combine(Values, Entries);
+        public override bool Equals(object obj) => base.Equals(obj);
     }
-
-    public class Entries    //[{id(), counter(), values(), logical_time()}].
-    {
-        public string Id{ get; set; }
-        public int Counter{ get; set; }
-        public string Values { get; set; }
-        public int Logical_time{ get; set; }
-    }
-
-
-    // 
-    //     Vector object for type reference.
-    //     
-    public class Vector     //[{id(), counter(), logical_time()}]
-    {
-        public string Id { get; set; }
-        public int Counter { get; set; }
-        public int Logical_time { get; set; }
-    }
-
-
 }
+

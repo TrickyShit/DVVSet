@@ -1,23 +1,25 @@
 using System.Collections.Generic;
+using NUnit.Framework;
 
-namespace DVVSet
+namespace DVVSet.Tests
 {
-    public class TestDVVSet
+    [TestFixture]
+    public class TestDvvSet
     {
-        public virtual object test_join()
+        public void Test_join()
         {
-            var DVVSet A = new ("v1");
-            var A1 = this.dvvset.create(A, "a");
-            var B = this.dvvset.new_with_history(this.dvvset.join(A1), "v2");
-            var B1 = this.dvvset.update(B, A1, "b");
-            this.assertEqual(this.dvvset.join(A), new List<object>());
-            this.assertEqual(this.dvvset.join(A1), new List<object> {
+            Clock a = new Clock("v1");
+            var a1 = Clock.Create(a, "a");
+            var b = this.dvvset.new_with_history(this.dvvset.join(a1), "v2");
+            var b1 = this.dvvset.update(b, a1, "b");
+            Assert.AreEqual(this.dvvset.join(a), new List<object>());
+            Assert.AreEqual(this.dvvset.join(a1), new List<object> {
                     new List<object> {
                         "a",
                         1
                     }
                 });
-            this.assertEqual(this.dvvset.join(B1), new List<object> {
+            this.assertEqual(this.dvvset.join(b1), new List<object> {
                     new List<object> {
                         "a",
                         1
@@ -31,20 +33,20 @@ namespace DVVSet
 
         public virtual object test_update()
         {
-            var A0 = this.dvvset.create(this.dvvset.@new("v1"), "a");
-            var A1 = this.dvvset.update(this.dvvset.new_list_with_history(this.dvvset.join(A0), new List<object> {
+            var a0 = this.dvvset.create(this.dvvset.@new("v1"), "a");
+            var a1 = this.dvvset.update(this.dvvset.new_list_with_history(this.dvvset.join(a0), new List<object> {
                     "v2"
-                }), A0, "a");
-            var A2 = this.dvvset.update(this.dvvset.new_list_with_history(this.dvvset.join(A1), new List<object> {
+                }), a0, "a");
+            var a2 = this.dvvset.update(this.dvvset.new_list_with_history(this.dvvset.join(a1), new List<object> {
                     "v3"
-                }), A1, "b");
-            var A3 = this.dvvset.update(this.dvvset.new_list_with_history(this.dvvset.join(A0), new List<object> {
+                }), a1, "b");
+            var a3 = this.dvvset.update(this.dvvset.new_list_with_history(this.dvvset.join(a0), new List<object> {
                     "v4"
-                }), A1, "b");
-            var A4 = this.dvvset.update(this.dvvset.new_list_with_history(this.dvvset.join(A0), new List<object> {
+                }), a1, "b");
+            var a4 = this.dvvset.update(this.dvvset.new_list_with_history(this.dvvset.join(a0), new List<object> {
                     "v5"
-                }), A1, "a");
-            this.assertEqual(A0, new List<object> {
+                }), a1, "a");
+            this.assertEqual(a0, new List<object> {
                     new List<object> {
                         new List<object> {
                             "a",
@@ -56,7 +58,7 @@ namespace DVVSet
                     },
                     new List<object>()
                 });
-            this.assertEqual(A1, new List<object> {
+            this.assertEqual(a1, new List<object> {
                     new List<object> {
                         new List<object> {
                             "a",
@@ -68,7 +70,7 @@ namespace DVVSet
                     },
                     new List<object>()
                 });
-            this.assertEqual(A2, new List<object> {
+            this.assertEqual(a2, new List<object> {
                     new List<object> {
                         new List<object> {
                             "a",
@@ -85,7 +87,7 @@ namespace DVVSet
                     },
                     new List<object>()
                 });
-            this.assertEqual(A3, new List<object> {
+            this.assertEqual(a3, new List<object> {
                     new List<object> {
                         new List<object> {
                             "a",
@@ -104,7 +106,7 @@ namespace DVVSet
                     },
                     new List<object>()
                 });
-            this.assertEqual(A4, new List<object> {
+            this.assertEqual(a4, new List<object> {
                     new List<object> {
                         new List<object> {
                             "a",
@@ -121,7 +123,7 @@ namespace DVVSet
 
         public virtual object test_sync()
         {
-            var X = new List<object> {
+            var x = new List<object> {
                     new List<object> {
                         new List<object> {
                             "x",
@@ -131,20 +133,20 @@ namespace DVVSet
                     },
                     new List<object>()
                 };
-            var A = this.dvvset.create(this.dvvset.@new("v1"), "a");
-            var Y = this.dvvset.create(this.dvvset.new_list(new List<object> {
+            var a = this.dvvset.create(this.dvvset.@new("v1"), "a");
+            var y = this.dvvset.create(this.dvvset.new_list(new List<object> {
                     "v2"
                 }), "b");
-            var A1 = this.dvvset.create(this.dvvset.new_list_with_history(this.dvvset.join(A), new List<object> {
+            var a1 = this.dvvset.create(this.dvvset.new_list_with_history(this.dvvset.join(a), new List<object> {
                     "v2"
                 }), "a");
-            var A3 = this.dvvset.create(this.dvvset.new_list_with_history(this.dvvset.join(A1), new List<object> {
+            var a3 = this.dvvset.create(this.dvvset.new_list_with_history(this.dvvset.join(a1), new List<object> {
                     "v3"
                 }), "b");
-            var A4 = this.dvvset.create(this.dvvset.new_list_with_history(this.dvvset.join(A1), new List<object> {
+            var a4 = this.dvvset.create(this.dvvset.new_list_with_history(this.dvvset.join(a1), new List<object> {
                     "v3"
                 }), "c");
-            var W = new List<object> {
+            var w = new List<object> {
                     new List<object> {
                         new List<object> {
                             "a",
@@ -154,7 +156,7 @@ namespace DVVSet
                     },
                     new List<object>()
                 };
-            var Z = new List<object> {
+            var z = new List<object> {
                     new List<object> {
                         new List<object> {
                             "a",
@@ -168,8 +170,8 @@ namespace DVVSet
                     new List<object>()
                 };
             this.assertEqual(this.dvvset.sync(new List<object> {
-                    W,
-                    Z
+                    w,
+                    z
                 }), new List<object> {
                     new List<object> {
                         new List<object> {
@@ -183,29 +185,29 @@ namespace DVVSet
                     new List<object>()
                 });
             this.assertEqual(this.dvvset.sync(new List<object> {
-                    W,
-                    Z
+                    w,
+                    z
                 }), this.dvvset.sync(new List<object> {
-                    Z,
-                    W
+                    z,
+                    w
                 }));
             this.assertEqual(this.dvvset.sync(new List<object> {
-                    A,
-                    A1
+                    a,
+                    a1
                 }), this.dvvset.sync(new List<object> {
-                    A1,
-                    A
+                    a1,
+                    a
                 }));
             this.assertEqual(this.dvvset.sync(new List<object> {
-                    A4,
-                    A3
+                    a4,
+                    a3
                 }), this.dvvset.sync(new List<object> {
-                    A3,
-                    A4
+                    a3,
+                    a4
                 }));
             this.assertEqual(this.dvvset.sync(new List<object> {
-                    A4,
-                    A3
+                    a4,
+                    a3
                 }), new List<object> {
                     new List<object> {
                         new List<object> {
@@ -231,8 +233,8 @@ namespace DVVSet
                     new List<object>()
                 });
             this.assertEqual(this.dvvset.sync(new List<object> {
-                    X,
-                    A
+                    x,
+                    a
                 }), new List<object> {
                     new List<object> {
                         new List<object> {
@@ -251,22 +253,22 @@ namespace DVVSet
                     new List<object>()
                 });
             this.assertEqual(this.dvvset.sync(new List<object> {
-                    X,
-                    A
+                    x,
+                    a
                 }), this.dvvset.sync(new List<object> {
-                    A,
-                    X
+                    a,
+                    x
                 }));
             this.assertEqual(this.dvvset.sync(new List<object> {
-                    X,
-                    A
+                    x,
+                    a
                 }), this.dvvset.sync(new List<object> {
-                    A,
-                    X
+                    a,
+                    x
                 }));
             this.assertEqual(this.dvvset.sync(new List<object> {
-                    A,
-                    Y
+                    a,
+                    y
                 }), new List<object> {
                     new List<object> {
                         new List<object> {
@@ -287,51 +289,51 @@ namespace DVVSet
                     new List<object>()
                 });
             this.assertEqual(this.dvvset.sync(new List<object> {
-                    Y,
-                    A
+                    y,
+                    a
                 }), this.dvvset.sync(new List<object> {
-                    A,
-                    Y
+                    a,
+                    y
                 }));
             this.assertEqual(this.dvvset.sync(new List<object> {
-                    Y,
-                    A
+                    y,
+                    a
                 }), this.dvvset.sync(new List<object> {
-                    A,
-                    Y
+                    a,
+                    y
                 }));
             this.assertEqual(this.dvvset.sync(new List<object> {
-                    A,
-                    X
+                    a,
+                    x
                 }), this.dvvset.sync(new List<object> {
-                    X,
-                    A
+                    x,
+                    a
                 }));
         }
 
         public virtual object test_sync_update()
         {
             // Mary writes v1 w/o VV
-            var A0 = this.dvvset.create(this.dvvset.new_list(new List<object> {
+            var a0 = this.dvvset.create(this.dvvset.new_list(new List<object> {
                     "v1"
                 }), "a");
             // Peter reads v1 with version vector (VV)
-            var VV1 = this.dvvset.join(A0);
+            var vv1 = this.dvvset.join(a0);
             // Mary writes v2 w/o VV
-            var A1 = this.dvvset.update(this.dvvset.new_list(new List<object> {
+            var a1 = this.dvvset.update(this.dvvset.new_list(new List<object> {
                     "v2"
-                }), A0, "a");
+                }), a0, "a");
             // Peter writes v3 with VV from v1
-            var A2 = this.dvvset.update(this.dvvset.new_list_with_history(VV1, new List<object> {
+            var a2 = this.dvvset.update(this.dvvset.new_list_with_history(vv1, new List<object> {
                     "v3"
-                }), A1, "a");
-            this.assertEqual(VV1, new List<object> {
+                }), a1, "a");
+            this.assertEqual(vv1, new List<object> {
                     new List<object> {
                         "a",
                         1
                     }
                 });
-            this.assertEqual(A0, new List<object> {
+            this.assertEqual(a0, new List<object> {
                     new List<object> {
                         new List<object> {
                             "a",
@@ -343,7 +345,7 @@ namespace DVVSet
                     },
                     new List<object>()
                 });
-            this.assertEqual(A1, new List<object> {
+            this.assertEqual(a1, new List<object> {
                     new List<object> {
                         new List<object> {
                             "a",
@@ -357,7 +359,7 @@ namespace DVVSet
                     new List<object>()
                 });
             // now A2 should only have v2 and v3, since v3 was causally newer than v1
-            this.assertEqual(A2, new List<object> {
+            this.assertEqual(a2, new List<object> {
                     new List<object> {
                         new List<object> {
                             "a",
@@ -408,42 +410,42 @@ namespace DVVSet
 
         public virtual object test_less()
         {
-            var A = this.dvvset.create(this.dvvset.new_list("v1"), new List<object> {
+            var a = this.dvvset.create(this.dvvset.new_list("v1"), new List<object> {
                     "a"
                 });
-            var B = this.dvvset.create(this.dvvset.new_list_with_history(this.dvvset.join(A), new List<object> {
+            var b = this.dvvset.create(this.dvvset.new_list_with_history(this.dvvset.join(a), new List<object> {
                     "v2"
                 }), "a");
-            var B2 = this.dvvset.create(this.dvvset.new_list_with_history(this.dvvset.join(A), new List<object> {
+            var b2 = this.dvvset.create(this.dvvset.new_list_with_history(this.dvvset.join(a), new List<object> {
                     "v2"
                 }), "b");
-            var B3 = this.dvvset.create(this.dvvset.new_list_with_history(this.dvvset.join(A), new List<object> {
+            var b3 = this.dvvset.create(this.dvvset.new_list_with_history(this.dvvset.join(a), new List<object> {
                     "v2"
                 }), "z");
-            var C = this.dvvset.update(this.dvvset.new_list_with_history(this.dvvset.join(B), new List<object> {
+            var c = this.dvvset.update(this.dvvset.new_list_with_history(this.dvvset.join(b), new List<object> {
                     "v3"
-                }), A, "c");
-            var D = this.dvvset.update(this.dvvset.new_list_with_history(this.dvvset.join(C), new List<object> {
+                }), a, "c");
+            var d = this.dvvset.update(this.dvvset.new_list_with_history(this.dvvset.join(c), new List<object> {
                     "v4"
-                }), B2, "d");
-            this.assertTrue(this.dvvset.less(A, B));
-            this.assertTrue(this.dvvset.less(A, C));
-            this.assertTrue(this.dvvset.less(B, C));
-            this.assertTrue(this.dvvset.less(B, D));
-            this.assertTrue(this.dvvset.less(B2, D));
-            this.assertTrue(this.dvvset.less(A, D));
-            this.assertFalse(this.dvvset.less(B2, C));
-            this.assertFalse(this.dvvset.less(B, B2));
-            this.assertFalse(this.dvvset.less(B2, B));
-            this.assertFalse(this.dvvset.less(A, A));
-            this.assertFalse(this.dvvset.less(C, C));
-            this.assertFalse(this.dvvset.less(D, B2));
-            this.assertFalse(this.dvvset.less(B3, D));
+                }), b2, "d");
+            this.assertTrue(this.dvvset.less(a, b));
+            this.assertTrue(this.dvvset.less(a, c));
+            this.assertTrue(this.dvvset.less(b, c));
+            this.assertTrue(this.dvvset.less(b, d));
+            this.assertTrue(this.dvvset.less(b2, d));
+            this.assertTrue(this.dvvset.less(a, d));
+            this.assertFalse(this.dvvset.less(b2, c));
+            this.assertFalse(this.dvvset.less(b, b2));
+            this.assertFalse(this.dvvset.less(b2, b));
+            this.assertFalse(this.dvvset.less(a, a));
+            this.assertFalse(this.dvvset.less(c, c));
+            this.assertFalse(this.dvvset.less(d, b2));
+            this.assertFalse(this.dvvset.less(b3, d));
         }
 
         public virtual object test_equal()
         {
-            var A = Clock(new List<object> {
+            var a = Clock(new List<object> {
                     new List<object> {
                         "a",
                         4,
@@ -467,7 +469,7 @@ namespace DVVSet
                 }, new List<object> {
                     "v0"
                 });
-            var B = Clock(new List<object> {
+            var b = Clock(new List<object> {
                     new List<object> {
                         "a",
                         4,
@@ -489,7 +491,7 @@ namespace DVVSet
                         }
                     }
                 }, new List<object>());
-            var C = Clock(new List<object> {
+            var c = Clock(new List<object> {
                     new List<object> {
                         "a",
                         4,
@@ -508,10 +510,10 @@ namespace DVVSet
                     "v1"
                 });
             // compare only the causal history
-            this.assertTrue(this.dvvset.equal(A, B));
-            this.assertTrue(this.dvvset.equal(B, A));
-            this.assertFalse(this.dvvset.equal(A, C));
-            this.assertFalse(this.dvvset.equal(B, C));
+            this.assertTrue(this.dvvset.equal(a, b));
+            this.assertTrue(this.dvvset.equal(b, a));
+            this.assertFalse(this.dvvset.equal(a, c));
+            this.assertFalse(this.dvvset.equal(b, c));
         }
 
         public virtual object test_size()
@@ -549,7 +551,7 @@ namespace DVVSet
 
         public virtual object test_values()
         {
-            var A = new List<object> {
+            var a = new List<object> {
                     new List<object> {
                         new List<object> {
                             "a",
@@ -576,7 +578,7 @@ namespace DVVSet
                         "v1"
                     }
                 };
-            var B = new List<object> {
+            var b = new List<object> {
                     new List<object> {
                         new List<object> {
                             "a",
@@ -601,7 +603,7 @@ namespace DVVSet
                     },
                     new List<object>()
                 };
-            var C = new List<object> {
+            var c = new List<object> {
                     new List<object> {
                         new List<object> {
                             "a",
@@ -619,32 +621,32 @@ namespace DVVSet
                         "v6"
                     }
                 };
-            this.assertEqual(this.dvvset.ids(A), new List<object> {
+            this.assertEqual(this.dvvset.ids(a), new List<object> {
                     "a",
                     "b",
                     "c"
                 });
-            this.assertEqual(this.dvvset.ids(B), new List<object> {
+            this.assertEqual(this.dvvset.ids(b), new List<object> {
                     "a",
                     "b",
                     "c"
                 });
-            this.assertEqual(this.dvvset.ids(C), new List<object> {
+            this.assertEqual(this.dvvset.ids(c), new List<object> {
                     "a",
                     "b"
                 });
-            this.assertEqual(this.dvvset.values(A).OrderBy(_p_1 => _p_1).ToList(), new List<object> {
+            this.assertEqual(this.dvvset.values(a).OrderBy(p1 => p1).ToList(), new List<object> {
                     "v0",
                     "v1",
                     "v3",
                     "v5"
                 });
-            this.assertEqual(this.dvvset.values(B).OrderBy(_p_2 => _p_2).ToList(), new List<object> {
+            this.assertEqual(this.dvvset.values(b).OrderBy(p2 => p2).ToList(), new List<object> {
                     "v0",
                     "v3",
                     "v555"
                 });
-            this.assertEqual(this.dvvset.values(C).OrderBy(_p_3 => _p_3).ToList(), new List<object> {
+            this.assertEqual(this.dvvset.values(c).OrderBy(p3 => p3).ToList(), new List<object> {
                     "v1",
                     "v6"
                 });
@@ -652,7 +654,7 @@ namespace DVVSet
 
         public virtual object test_ids_values()
         {
-            var A = new List<object> {
+            var a = new List<object> {
                     new List<object> {
                         new List<object> {
                             "a",
@@ -679,7 +681,7 @@ namespace DVVSet
                         "v1"
                     }
                 };
-            var B = new List<object> {
+            var b = new List<object> {
                     new List<object> {
                         new List<object> {
                             "a",
@@ -704,7 +706,7 @@ namespace DVVSet
                     },
                     new List<object>()
                 };
-            var C = new List<object> {
+            var c = new List<object> {
                     new List<object> {
                         new List<object> {
                             "a",
@@ -722,40 +724,35 @@ namespace DVVSet
                         "v6"
                     }
                 };
-            this.assertEqual(this.dvvset.ids(A), new List<object> {
+            this.assertEqual(this.dvvset.ids(a), new List<object> {
                     "a",
                     "b",
                     "c"
                 });
-            this.assertEqual(this.dvvset.ids(B), new List<object> {
+            this.assertEqual(this.dvvset.ids(b), new List<object> {
                     "a",
                     "b",
                     "c"
                 });
-            this.assertEqual(this.dvvset.ids(C), new List<object> {
+            this.assertEqual(this.dvvset.ids(c), new List<object> {
                     "a",
                     "b"
                 });
-            this.assertEqual(this.dvvset.values(A).OrderBy(_p_1 => _p_1).ToList(), new List<object> {
+            this.assertEqual(this.dvvset.values(a).OrderBy(p1 => p1).ToList(), new List<object> {
                     "v0",
                     "v1",
                     "v3",
                     "v5"
                 });
-            this.assertEqual(this.dvvset.values(B).OrderBy(_p_2 => _p_2).ToList(), new List<object> {
+            this.assertEqual(this.dvvset.values(b).OrderBy(p2 => p2).ToList(), new List<object> {
                     "v0",
                     "v3",
                     "v555"
                 });
-            this.assertEqual(this.dvvset.values(C).OrderBy(_p_3 => _p_3).ToList(), new List<object> {
+            this.assertEqual(this.dvvset.values(c).OrderBy(p3 => p3).ToList(), new List<object> {
                     "v1",
                     "v6"
                 });
         }
-    }
-
-    static Module()
-    {
-        unittest.main();
     }
 }
