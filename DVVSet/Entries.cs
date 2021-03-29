@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DVVSet
 {
@@ -11,12 +13,15 @@ namespace DVVSet
         public List<Vector> VecValues { get; set; }
         public List<string> Idlist { get; set; }
         public int Counter { get; set; }
+        public int LogicalTime { get; set; }
         public string Id { get; set; }
         public List<string> Values { get; set; }
         public string Value { get; set; }
         public SortedList<string, Vector> Vectors { get; set; }
         public Vector Node { get; set; }
 
+        public Vector Vector { get; set; }
+        public List<Vector> Vectors { get; set; }
 
         public Entries() { }
 

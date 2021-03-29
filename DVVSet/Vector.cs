@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DVVSet
 {
@@ -22,6 +23,7 @@ namespace DVVSet
 
         public void Deconstruct(out int counter, out string value)
         {
+            id = this.Id;
             counter = this.Counter;
             value = this.Value;
         }

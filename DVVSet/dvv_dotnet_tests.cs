@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 
-namespace DVVSet
+namespace DVVSet.Tests
 {
     [TestFixture]
     public class TestDvvSet

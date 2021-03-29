@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace DVVSet
 {
-    public class Clock      //{entries(), values()}
+    public class Clock//{entries(), values()}
     {
         public int Counter { get; set; }
         public string Id { get; set; }
