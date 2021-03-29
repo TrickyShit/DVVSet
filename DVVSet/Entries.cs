@@ -1,47 +1,54 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DVVSet
 {
+    //      * entries() are sorted by id()
+    //      * each counter() also includes the number of values in that id()
+    //      * the values in each triple of entries() are causally ordered and each new value goes to the head of the list
+
     public class Entries //[{id(), counter(), values()}, {values()}] => [{vector},{values}]
     {
+        public List<Vector> VecValues { get; set; }
+        public List<string> Idlist { get; set; }
         public int Counter { get; set; }
-        public int LogicalTime { get; set; }
         public string Id { get; set; }
         public List<string> Values { get; set; }
-        public List<string> VecValues { get; set; }
+        public string Value { get; set; }
+        public SortedList<string, Vector> Vectors { get; set; }
+        public Vector Node { get; set; }
 
-        public Vector Vector { get; set; }
-        public List<Vector> Vectors { get; set; }
 
         public Entries() { }
 
-        public Entries(Vector vector, List<string> values) 
+        public Entries(string id, int counter, string value)
         {
-            Vector = vector;
-            Id = vector.Id;
-            Counter = vector.Counter;
-            VecValues = vector.Values;
-            Values = values;
+            Id = id;
+            Counter = counter;
+            Value = value;
         }
 
-        public Entries(List<Vector> vector, List<string> values)
-        {
-            Vectors = vector;
-            Values = values;
-        }
-
-        public void Deconstruct(out string id, out int counter, out List<string> values)
+        public void Deconstruct(out string id, out int counter, out string value)
         {
             id = this.Id;
             counter = this.Counter;
-            values = this.Values;
+            value = this.Value;
         }
 
-        public static implicit operator Entries(Vector v)
+
+        public Entries(string id, Vector node)
         {
-            throw new NotImplementedException();
+            Id=id;
+            Node=node;
+            Counter = node.Counter;
+            Value = node.Value;
+        }
+
+        public Entries(SortedList<string, Vector> vector, List<string> values)
+        {
+            VecValues = (List<Vector>)vector.Values;
+            Idlist = (List<string>)vector.Keys;
+            Values = values;
+            Vectors = vector;
         }
     }
 }

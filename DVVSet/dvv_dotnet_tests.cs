@@ -1,15 +1,17 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 
-namespace DVVSet.Tests
+namespace DVVSet
 {
     [TestFixture]
     public class TestDvvSet
     {
+        [TestCase]
         public void Test_join()
         {
-            Clock a = new Clock("v1");
+            var a = new Clock("v1");
             var a1 = Clock.Create(a, "a");
+
             var b = this.dvvset.new_with_history(this.dvvset.join(a1), "v2");
             var b1 = this.dvvset.update(b, a1, "b");
             Assert.AreEqual(this.dvvset.join(a), new List<object>());
@@ -29,6 +31,7 @@ namespace DVVSet.Tests
                         1
                     }
                 });
+            Assert.AreEqual(0, clock.Versions.Count);
         }
 
         public virtual object test_update()
