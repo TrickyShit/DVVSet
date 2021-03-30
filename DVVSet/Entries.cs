@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace DVVSet
@@ -51,5 +52,7 @@ namespace DVVSet
             counter = Counter;
             value = Value;
         }
+
+        public static implicit operator Entries(SortedList<string, Vector> v) => new Entries(v);
     }
 }

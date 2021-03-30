@@ -5000,11 +5000,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\Users\\trick\\source\\repos\\DVVSet\\DVVSetTests\\DVVSetTests.csproj",
+      "projectUniqueName": "C:\\Users\\trick\\source\\repos\\DVVSet\\DVVSetTests\\DVVSetTests.csproj",
       "projectName": "DVVSetTests",
-      "projectPath": "c:\\Users\\trick\\source\\repos\\DVVSet\\DVVSetTests\\DVVSetTests.csproj",
+      "projectPath": "C:\\Users\\trick\\source\\repos\\DVVSet\\DVVSetTests\\DVVSetTests.csproj",
       "packagesPath": "C:\\Users\\trick\\.nuget\\packages\\",
-      "outputPath": "c:\\Users\\trick\\source\\repos\\DVVSet\\DVVSetTests\\obj\\",
+      "outputPath": "C:\\Users\\trick\\source\\repos\\DVVSet\\DVVSetTests\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -5014,7 +5014,7 @@
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
-        ".NETCoreApp,Version=v3.1"
+        "netcoreapp3.1"
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
@@ -5024,8 +5024,8 @@
         "netcoreapp3.1": {
           "targetAlias": ".NETCoreApp,Version=v3.1",
           "projectReferences": {
-            "c:\\Users\\trick\\source\\repos\\DVVSet\\DVVSet\\DVVSet.csproj": {
-              "projectPath": "c:\\Users\\trick\\source\\repos\\DVVSet\\DVVSet\\DVVSet.csproj"
+            "C:\\Users\\trick\\source\\repos\\DVVSet\\DVVSet\\DVVSet.csproj": {
+              "projectPath": "C:\\Users\\trick\\source\\repos\\DVVSet\\DVVSet\\DVVSet.csproj"
             }
           }
         }

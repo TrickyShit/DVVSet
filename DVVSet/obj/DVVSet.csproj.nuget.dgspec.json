@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\trick\\source\\repos\\DVVSet\\DVVSet\\DVVSet.csproj": {}
+    "C:\\Users\\trick\\source\\repos\\DVVSet\\DVVSet\\DVVSet.csproj": {}
   },
   "projects": {
-    "c:\\Users\\trick\\source\\repos\\DVVSet\\DVVSet\\DVVSet.csproj": {
+    "C:\\Users\\trick\\source\\repos\\DVVSet\\DVVSet\\DVVSet.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\trick\\source\\repos\\DVVSet\\DVVSet\\DVVSet.csproj",
+        "projectUniqueName": "C:\\Users\\trick\\source\\repos\\DVVSet\\DVVSet\\DVVSet.csproj",
         "projectName": "DVVSet",
-        "projectPath": "c:\\Users\\trick\\source\\repos\\DVVSet\\DVVSet\\DVVSet.csproj",
+        "projectPath": "C:\\Users\\trick\\source\\repos\\DVVSet\\DVVSet\\DVVSet.csproj",
         "packagesPath": "C:\\Users\\trick\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\trick\\source\\repos\\DVVSet\\DVVSet\\obj\\",
+        "outputPath": "C:\\Users\\trick\\source\\repos\\DVVSet\\DVVSet\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
