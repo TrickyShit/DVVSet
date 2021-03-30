@@ -1,34 +1,30 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DVVSet
 {
     public class Vector //[{id(), counter()}, {values()}}].
     {
-        public int Counter { get; set;}
-        public List<string> Values { get; set;}
+        public Vector()
+        {
+        }
+
+        public Vector(int counter, List<string> value)
+        {
+            Counter = counter;
+            Values = value;
+        }
+
+        public int Counter { get; set; }
+        public List<string> Values { get; set; }
         public string Value { get; set; }
         public string Id { get; set; }
 
-
-        public Vector(){ }
-
-        public Vector(string id, int counter, string value)
+        public void Deconstruct(out int counter, out List<string> value)
         {
-            Id=id;
-            Counter = counter;
-            Value = value;
+            counter = Counter;
+            value = Values;
         }
-
-        public void Deconstruct(out int counter, out string value)
-        {
-            id = this.Id;
-            counter = this.Counter;
-            value = this.Value;
-        }
-
-
 
 
         //public override bool Equals(object obj)

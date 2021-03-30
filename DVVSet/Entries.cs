@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DVVSet
 {
@@ -10,6 +8,33 @@ namespace DVVSet
 
     public class Entries //[{id(), counter(), values()}, {values()}] => [{vector},{values}]
     {
+        public Entries()
+        {
+        }
+
+        public Entries(string id, int counter, string value)
+        {
+            Id = id;
+            Counter = counter;
+            Value = value;
+        }
+
+
+        public Entries(string id, Vector node)
+        {
+            Id = id;
+            Node = node;
+            Counter = node.Counter;
+            Value = node.Value;
+        }
+
+        public Entries(SortedList<string, Vector> vector)
+        {
+            VecValues = (List<Vector>) vector.Values;
+            Idlist = (List<string>) vector.Keys;
+            Vectors = vector;
+        }
+
         public List<Vector> VecValues { get; set; }
         public List<string> Idlist { get; set; }
         public int Counter { get; set; }
@@ -20,40 +45,11 @@ namespace DVVSet
         public SortedList<string, Vector> Vectors { get; set; }
         public Vector Node { get; set; }
 
-        public Vector Vector { get; set; }
-        public List<Vector> Vectors { get; set; }
-
-        public Entries() { }
-
-        public Entries(string id, int counter, string value)
-        {
-            Id = id;
-            Counter = counter;
-            Value = value;
-        }
-
         public void Deconstruct(out string id, out int counter, out string value)
         {
-            id = this.Id;
-            counter = this.Counter;
-            value = this.Value;
-        }
-
-
-        public Entries(string id, Vector node)
-        {
-            Id=id;
-            Node=node;
-            Counter = node.Counter;
-            Value = node.Value;
-        }
-
-        public Entries(SortedList<string, Vector> vector, List<string> values)
-        {
-            VecValues = (List<Vector>)vector.Values;
-            Idlist = (List<string>)vector.Keys;
-            Values = values;
-            Vectors = vector;
+            id = Id;
+            counter = Counter;
+            value = Value;
         }
     }
 }

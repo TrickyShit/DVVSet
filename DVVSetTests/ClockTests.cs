@@ -17,6 +17,8 @@ namespace DVVSet.Tests
             var a1 = test.Create(a, "a");
             //var b = test.NewWithHistory(Join(a1), "v2");
             //var b1 = test.Update(b, a1, "b");
+            Assert.AreEqual(a.ToString(), "v1");
+            Assert.AreEqual(a1.ToString(), "[{a,1,[],1}]");
 
         }
     }
