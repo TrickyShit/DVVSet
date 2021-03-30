@@ -1,13 +1,12 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
-%% STRUCTURE  
+%%%%%%%%%% STRUCTURE %%%%%%%%%%  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
   
 clock()         :: {entries(), values()}.  
-vector()        :: [{id(), counter(), logical_time()}].  
-entries()       :: [{id(), counter(), values(), logical_time()}].  
-id()            :: any().  
+vector()        :: [{id(), counter(), values()}].  
+entries()       :: [{id()}, {counter(), [values()]}].  
+id()            :: string().  
 values()        :: [value()].  
-value()         :: any().  
+value()         :: string().  
 counter()       :: non_neg_integer().  
-logical_time()  :: pos_integer().  
