@@ -6,17 +6,18 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DVVSet
 {
     public class Dvvdotnet
     {
-        
+
         //*******************************************************************************//
         //*   NewList constructs a new clock set without causal history, and            *//
         //*   receives one value or list of values that goes to the anonymous list.     *//
         //*******************************************************************************//
-        public Clock NewList(List<string> values=null, string value="") => value=="" ? new Clock(values) : new Clock(value);
+        public Clock NewList(List<string> values = null, string value = "") => value == "" ? new Clock(values) : new Clock(value);
 
         //* NewWithHistory constructs a new clock set with the causal
         //* history of the given version vector / vector clock,
@@ -53,7 +54,7 @@ namespace DVVSet
         // Method Create advances the causal history with the given id.
         // The new value is the *anonymous dot* of the clock.
         // The client clock SHOULD BE a direct result of method NewList.
-        public Clock Create(Clock clock, string theId) 
+        public Clock Create(Clock clock, string theId)
         {
             var entries = clock.Entries;
             List<string> values;
@@ -134,29 +135,51 @@ namespace DVVSet
             }
             else
             {
-                count=count2;
-                values=count2 - len2 >= count1 - len1?values2:values2.GetRange(0, count2 - count1 + len1);
+                count = count2;
+                values = count2 - len2 >= count1 - len1 ? values2 : values2.GetRange(0, count2 - count1 + len1);
             }
             var value = new Vector(count, values);
             result.Add(id, value);
             return result;
         }
 
+        //_________________________________________________________________
         // SortedList represents a collection of key/value pairs
-        // that are automatically sorted by the key(ID) and are accessible by key
-        // and by index. So method foldl is don't needed.
+        // that are automatically sorted by the key(ID) and are accessible
+        // by key and by index. So method foldl is don't needed.
+        //_________________________________________________________________
+
 
         //*******************************************************************************//
         //* Synchronizes a list of clocks using Sync().                                 *// 
         //* It discards (causally) outdated values, while merging all causal histories. *//
 
-        private Clock Sync(Clock clock1, Clock clock2)
+        private Clock SyncValues(Clock clock1, Clock clock2)
         {
-            if(clock1==null)return clock2;
-            if(clock2==null)return clock1;
-            var(entries1, values1)=clock1;
-            var(entries2, values2)=clock2;
+            if (clock1 == null) return clock2;
+            if (clock2 == null) return clock1;
+            Clock result = null;
+            var (entries1, values1) = clock1;
+            var (entries2, values2) = clock2;
+            List<string> value;
+            if (Less(clock1, clock2)) value = values2;
+            else
+            if (Less(clock2, clock1)) value = values1;
+            else
+            {
+                value = values1.AddRange(values2);
+                result.Values=value.Distinct().ToList();      //Duplicate values are removed here
+            }
+            result.Entries = SyncEntries(entries1, entries2);
+            return result;
+        }
+
+        private Entries SyncEntries(Entries entry1, Entries entry2)
+        {
+            if (entry1 == null) return entry2;
+            if (entry2 == null) return entry1;
 
         }
+
     }
 }
