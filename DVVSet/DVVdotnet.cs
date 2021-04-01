@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using NUnit.Framework;
 
 namespace DVVSet
 {
@@ -154,32 +155,104 @@ namespace DVVSet
         //* Synchronizes a list of clocks using Sync().                                 *// 
         //* It discards (causally) outdated values, while merging all causal histories. *//
 
-        private Clock SyncValues(Clock clock1, Clock clock2)
+        private Clock SyncClocks(Clock clock1, Clock clock2)
         {
             if (clock1 == null) return clock2;
             if (clock2 == null) return clock1;
             Clock result = null;
+            List<string> value;
             var (entries1, values1) = clock1;
             var (entries2, values2) = clock2;
-            List<string> value;
-            if (Less(clock1, clock2)) value = values2;
+            if (Greater(entries1, entries2, false)) value = values1;
             else
-            if (Less(clock2, clock1)) value = values1;
+            if (Greater(entries2, entries1, false)) value = values2;
             else
             {
-                value = values1.AddRange(values2);
-                result.Values=value.Distinct().ToList();      //Duplicate values are removed here
+                value = values1;
+                value.AddRange(values2);
+                result.Values = value.Distinct().ToList();      //Duplicate values are removed here
             }
             result.Entries = SyncEntries(entries1, entries2);
             return result;
         }
 
-        private Entries SyncEntries(Entries entry1, Entries entry2)
+        private Entries SyncEntries(SortedList<string, Vector> entry1, SortedList<string, Vector> entry2)
         {
-            if (entry1 == null) return entry2;
-            if (entry2 == null) return entry1;
+            if (!entry1.Any()) return entry2;
+            if (!entry2.Any()) return entry1;
+            var head1 = entry1.Keys;
+            var head2 = entry2.Keys;
+            if (comparator.compare(head2.get(0), head1.get(0)) > 0)
+            {
+                List result = new ArrayList();
+                result.add(head1);
+                List toAppend = _sync2(entries1.subList(1, entries1.size()), entries2);
+                result.addAll(toAppend);
+                return result;
+            }
+            if (comparator.compare(head1.get(0), head2.get(0)) > 0)
+            {
+                List result = new ArrayList();
+                result.add(head2);
+                List toAppend = _sync2(entries2.subList(1, entries2.size()), entries1);
+                result.addAll(toAppend);
+                return result;
+            }
 
+            Object theId = head1.get(0);
+            int counter1 = (int)head1.get(1);
+            List values1 = (List)head1.get(2);
+            int counter2 = (int)head2.get(1);
+            List values2 = (List)head2.get(2);
+            List result = new ArrayList();
+            List mergeResult = _merge(theId, counter1, values1, counter2, values2);
+            result.add(mergeResult);
+            List syncResult = _sync2(entries1.subList(1, entries1.size()), entries2.subList(1, entries2.size()));
+            result.addAll(syncResult);
+            return result;
         }
 
+
+    /* Returns True if the first clock is causally older than
+    * the second clock, thus values on the first clock are outdated.
+    * Returns False otherwise.*/
+
+    public bool Less(Clock clock1, Clock clock2)
+    {
+        return Greater(clock2.Entries, clock1.Entries, false);
     }
+
+    private bool Greater(SortedList<string, Vector> vector1, SortedList<string, Vector> vector2, bool isStrict)
+    {
+        if (!vector1.Any() && !vector2.Any())
+        {
+            return isStrict;
+        }
+        if (!vector2.Any()) return true;
+        if (!vector1.Any()) return false;
+        int counter = 0;
+        foreach (var node1 in vector1)
+        {
+            var node2 = vector2.ToArray()[counter];
+            try
+            {
+            }
+            catch (Exception)
+            {
+                return true;
+            }
+            counter++;
+            var value1 = node1.Key;
+            var value2 = node2.Key;
+            if (!value1.Equals(value2)) continue;
+            var dotNum1 = node1.Value.Counter;
+            var dotNum2 = node2.Value.Counter;
+            if (dotNum1 > dotNum2) return true;
+            if (dotNum1 < dotNum2) return false;
+            if (string.Compare(value2, value1, StringComparison.Ordinal) > 0) continue;
+            return false;
+        }
+        return false;
+    }
+}
 }

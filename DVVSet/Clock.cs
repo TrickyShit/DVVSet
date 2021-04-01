@@ -37,7 +37,7 @@ namespace DVVSet
             Values = values;
         }
 
-        public void Deconstruct(out Entries entries, out List<string>values)
+        public void Deconstruct(out SortedList<string, Vector> entries, out List<string>values)
         {
             entries = Entries;
             values = Values;
@@ -46,7 +46,7 @@ namespace DVVSet
         public int Counter { get; set; }
         public string Id { get; set; }
         public Entries Entrie { get; }
-        public SortedList<string, Vector> Entries { get; }
+        public SortedList<string, Vector> Entries { get; set; }
         public List<string> Values { get; set; }
     }
 }
