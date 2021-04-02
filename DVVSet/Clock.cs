@@ -8,15 +8,17 @@ using System.Collections.Generic;
 
 namespace DVVSet
 {
-    public class Clock //{entries(), values()}
+    public class Clock:Entries //{entries(), values()}
     {
-        public Clock()
-        {
-        }
+        public List<string> Values { get; set; }
+        public SortedList<string, Vector> Entries { get; set; }
 
-        public Clock(Entries entries)
+        public Clock() { }
+
+        public Clock(SortedList<string, Vector> entries)
         {
-            Entrie = entries;
+            Entries = entries;
+            Values = new List<string>();
         }
 
         public Clock(string value)
@@ -37,16 +39,10 @@ namespace DVVSet
             Values = values;
         }
 
-        public void Deconstruct(out SortedList<string, Vector> entries, out List<string>values)
+        public void Deconstruct(out SortedList<string, Vector> entries, out List<string> values)
         {
             entries = Entries;
             values = Values;
         }
-
-        public int Counter { get; set; }
-        public string Id { get; set; }
-        public Entries Entrie { get; }
-        public SortedList<string, Vector> Entries { get; set; }
-        public List<string> Values { get; set; }
     }
 }
