@@ -4,45 +4,72 @@
 // order information.
 // 
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DVVSet
 {
-    public class Clock:Entries //{entries(), values()}
+    public class Clock //{entries(), values()}
     {
-        public List<string> Values { get; set; }
         public SortedList<string, Vector> Entries { get; set; }
+        public List<string> ClockValues { get; set; }
 
         public Clock() { }
 
         public Clock(SortedList<string, Vector> entries)
         {
             Entries = entries;
-            Values = new List<string>();
+            ClockValues = new List<string>();
         }
 
         public Clock(string value)
         {
             Entries = new SortedList<string, Vector>();
-            Values = new List<string> { value };
+            ClockValues = new List<string> {value};
         }
 
-        public Clock(SortedList<string, Vector> entries, List<string> values)
-        {
-            Entries = entries;
-            Values = values;
-        }
-
-        public Clock(List<string> values)
+        public Clock(List<string> clockValues)
         {
             Entries = new SortedList<string, Vector>();
-            Values = values;
+            ClockValues = clockValues;
+        }
+
+        public Clock(SortedList<string, Vector> entries, List<string> clockValues) : this(clockValues)
+        {
+            Entries = entries;
+            ClockValues = clockValues;
         }
 
         public void Deconstruct(out SortedList<string, Vector> entries, out List<string> values)
         {
             entries = Entries;
-            values = Values;
+            values = ClockValues;
+        }
+
+        protected static string ClockToString(Clock clock)
+        {
+            var result="";
+            if (clock.Entries.Count > 0)
+            {
+                int count = 0;
+                foreach (var (key, (counter, value)) in clock.Entries)
+                {
+                    result += "[{" + key + "," + counter + ",";
+                    if (value.Count == 0) result += "[]";
+                    else result = value.Aggregate(result, (current, i) => current + "[" + i + "]");
+                    result += "}]";
+                    if (clock.ClockValues.Any()) result += "[" + clock.ClockValues[count] + "]";
+                    count++;
+                }
+            }
+            else
+            {
+                if(clock.ClockValues.Any())return result+clock.ClockValues.Aggregate("[]", (current, i) => current + "[" + i + "]");
+            }
+
+            Console.WriteLine(result);
+            return result;
         }
     }
 }

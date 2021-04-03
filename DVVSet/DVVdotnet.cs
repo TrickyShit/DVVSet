@@ -10,80 +10,50 @@ using System.Linq;
 
 namespace DVVSet
 {
-    public class Dvvdotnet : Entries
+    public class Dvvdotnet : Clock
     {
 
         //*******************************************************************************//
         //*   NewList constructs a new clock set without causal history, and            *//
         //*   receives one value or list of values that goes to the anonymous list.     *//
         //*******************************************************************************//
-        public Clock NewList(List<string> values = null, string value = "") => value == "" ? new Clock(values) : new Clock(value);
+        public static Clock NewList(List<string> values = null, string value = "")
+        {
+            if (value == "") return new Clock(values);
+            values = new List<string> { value };
+            return new Clock(values);
+        }
 
         //* NewWithHistory constructs a new clock set with the causal
         //* history of the given version vector / vector clock,
         //* and receives one value that goes to the anonymous list.
         //* The version vector SHOULD BE the output of join.
-        public Clock NewWithHistory(SortedList<string, Vector> vector, string value = "", List<string> values = null)
-        {
-            var entries = new SortedList<string, Vector>();
-            foreach (var (key, (counter, list)) in vector)
-            {
-                AddEntries(entries, key, counter, list);
-            }
 
-            return values == null ? new Clock(entries, new List<string> { value }) : new Clock(entries, values);
-        }
-
-        public Clock NewWithHistory(Entries vector, string value = "", List<string> values = null)
+        protected static Clock NewWithHistory(SortedList<string, Vector> vector, string value = "", List<string> values = null)
         {
-            var entries = new SortedList<string, Vector>();
-            values ??= new List<string> { value };
-            var id = vector.Id;
-            var counter = vector.Counter;
-            var val = vector.Values;
-            var node = new Vector
-            {
-                Counter = counter,
-                Values = val
-            };
-            entries.Add(id, node);
-            return new Clock(entries, values);
+            if (value != "") values = new List<string> { value };
+            return new Clock(vector, values);
         }
 
         // Method Create advances the causal history with the given id.
         // The new value is the *anonymous dot* of the clock.
         // The client clock SHOULD BE a direct result of method NewList.
-        public Clock Create(Clock clock, string theId)
+        protected Clock Create(Clock clock, string theId)
         {
             var entries = clock.Entries;
-            if (entries != null)
-            {
-                var result = entries;
-                var values = clock.Values;
-                return new Clock(Entry(result, theId, values), new List<string>());
-
-            }
-            else
-            {
-                var id = clock.Entries.First().Key;
-                var counter = clock.Entries.First().Value.Counter;
-                var value = clock.Entries.First().Value.Values;
-
-                //var (id, counter, value) = clock.Entrie;
-                var result = new SortedList<string, Vector>();
-                AddEntries(result, id, counter, value);
-                return new Clock(Entry(result, theId, value), new List<string>());
-            }
+            var values = clock.ClockValues;
+            var result = Entry(entries, theId, new List<string> {values[0]});
+            return new Clock(result, new List<string>());
         }
 
         //* Return a version vector that represents the causal history.
 
-        public SortedList<string, Vector> Join(Clock clock)
+        protected static SortedList<string, Vector> Join(Clock clock)
         {
             var result = new SortedList<string, Vector>();
             foreach (var (key, value) in clock.Entries)
             {
-                value.Values = null;
+                value.Values = new List<string>();
                 result.Add(key, value);
             }
             return result;
@@ -95,11 +65,12 @@ namespace DVVSet
         * The first clock SHOULD BE a direct result of new/2, which is intended to be the client clock with
         * the new value in the *anonymous dot* while the second clock is from the local server.*/
 
-        public Clock Update(Clock clock1, Clock clock2, string theId)
+        protected Clock Update(Clock clock1, Clock clock2, string theId)
         {
             // Sync both clocks without the new value
-            var (entries1, values1) = clock1;
-            var c1 = new Clock { Entries = entries1, Values = new List<string>() };
+            var entries1 = clock1.Entries;
+            var values1 = clock1.ClockValues;
+            var c1 = new Clock { Entries = entries1, ClockValues = new List<string>() };
             var (entries, values) = SyncClocks(c1, clock2);
             // We create a new event on the synced causal history,
             // with the id I and the new value.
@@ -112,26 +83,23 @@ namespace DVVSet
         // We create a new event on the synced causal history,
         // with the id and the new value.
         // The anonymous values that were synced still remain.
-        private SortedList<string, Vector> Entry(SortedList<string, Vector> vector, string theId, List<string> value)
+        private SortedList<string, Vector> Entry(SortedList<string, Vector> vector, string theId, List<string> values)
         {
             var result = new SortedList<string, Vector>();
             if (vector.Count == 0)
             {
-                var res = new Vector
-                {
-                    Counter = 1,
-                    Values = value
-                };
-                result.Add(theId, res);
+                result.Add(theId,new Vector(1, values));
                 return result;
             }
             if (vector.ContainsKey(theId))
             {
                 var (mergeCounter, mergeValues) = vector[theId];
                 int newCounter = mergeCounter + 1;
-                var mergeclock = Merge(theId, mergeCounter, mergeValues, newCounter, value);
+                var mergeclock = Merge(theId, mergeCounter, mergeValues, newCounter, values);
                 return new SortedList<string, Vector>
-                    {{mergeclock.Keys[0], mergeclock.Values[0]}};
+                    {{mergeclock.Keys[0], mergeclock.Values[0]
+    }
+};
             }
             else
             {
@@ -139,7 +107,7 @@ namespace DVVSet
                 var i = string.Compare(vectorId, theId, StringComparison.Ordinal);
                 if (i > 0)
                 {
-                    var newVector = new Vector { Counter = 1, Values = value };
+                    var newVector = new Vector { Counter = 1, Values = values };
                     result.Add(theId, newVector);
                     foreach (var v in vector)
                         result.Add(v.Key, v.Value);
@@ -149,16 +117,16 @@ namespace DVVSet
             result.Add(vector.Keys[0], vector.Values[0]);
             var eventValue = vector;
             eventValue.RemoveAt(0);
-            var eventV = Entry(eventValue, theId, value);
+            var eventV = Entry(eventValue, theId, values);
             foreach (var (key, vector1) in eventV)
                 result.Add(key, vector1);
             return result;
         }
 
-        private SortedList<string, Vector> Merge(string id, int count1, List<string> values1, int count2, List<string> values2)
+        private static SortedList<string, Vector> Merge(string id, int count1, List<string> values1, int count2, List<string> values2)
         {
-            int len1 = values1.Count;
-            int len2 = values2.Count;
+            var len1 = values1?.Count ?? 0;
+            var len2 = values2?.Count ?? 0;
             var result = new SortedList<string, Vector>();
             List<string> values;
             int count;
@@ -192,7 +160,7 @@ namespace DVVSet
         {
             if (clock1 == null) return clock2;
             if (clock2 == null) return clock1;
-            Clock result = null;
+            var result = new Clock();
             List<string> value;
             var (entries1, values1) = clock1;
             var (entries2, values2) = clock2;
@@ -202,9 +170,13 @@ namespace DVVSet
             else
             {
                 value = values1;
-                value.AddRange(values2);
-                result.Values = value.Distinct().ToList();      //Duplicate values are removed here
+                if (values1 == null)
+                {
+                    value = values2;
+                }
+                else value.AddRange(values2);
             }
+            result.ClockValues = value.Distinct().ToList();      //Duplicate values are removed here
             result.Entries = SyncEntries(entries1, entries2);
             return result;
         }
@@ -235,13 +207,13 @@ namespace DVVSet
                 return result;
             }
             var mergeResult = Merge(head1.Key, head1.Value.Counter, head1.Value.Values, head2.Value.Counter, head2.Value.Values);
-            result = (SortedList<string, Vector>)result.Concat(mergeResult);
+            foreach (var i in mergeResult) result.Add(i.Key, i.Value);
             var syncResult = SyncEntries(subList1, subList2);
-            result = (SortedList<string, Vector>)result.Concat(syncResult);
+            foreach (var i in syncResult) result.Add(i.Key, i.Value);
             return result;
         }
 
-        private int CompareEntries(SortedList<string, Vector> entries1, SortedList<string, Vector> entries2)
+        private static int CompareEntries(SortedList<string, Vector> entries1, SortedList<string, Vector> entries2)
         {
             int counter = 0;
             foreach (var va in entries1)
@@ -276,10 +248,7 @@ namespace DVVSet
         * the second clock, thus values on the first clock are outdated.
         * Returns False otherwise.*/
 
-        public bool Less(Clock clock1, Clock clock2)
-        {
-            return Greater(clock2.Entries, clock1.Entries, false);
-        }
+        public static bool Less(Clock clock1, Clock clock2) => Greater(clock2.Entries, clock1.Entries, false);
 
         private static bool Greater(SortedList<string, Vector> vector1, SortedList<string, Vector> vector2, bool isStrict)
         {
@@ -315,20 +284,20 @@ namespace DVVSet
         }
 
         //Returns the total number of values in this clock set.
-        public int Size(Clock clock)
+        public static int Size(Clock clock)
         {
             var result = clock.Entries.Values.Count(i => i.Values.Any());
-            result += clock.Values.Count;
+            result += clock.ClockValues.Count;
             return result;
         }
 
-        public List<string> Ids(Clock clock) => clock.Entries.Keys as List<string>;
+        public static List<string> Ids(Clock clock) => clock.Entries.Keys as List<string>;
 
         /*
- * Returns all the values used in this clock set,
- * including the anonymous values.
- */
-        public List<string> ListValues(Clock clock)
+        * Returns all the values used in this clock set,
+        * including the anonymous values.
+        */
+        public static List<string> ListValues(Clock clock)
         {
             var result = new List<string>();
             var entries = clock.Entries;
@@ -336,7 +305,7 @@ namespace DVVSet
             {
                 result.AddRange(i.Value.Values);
             }
-            result.AddRange(clock.Values);
+            result.AddRange(clock.ClockValues);
             return result;
         }
 
@@ -344,12 +313,9 @@ namespace DVVSet
          * Compares the equality of both clocks, regarding
          * only the causal histories, thus ignoring the values.
          */
-        public bool Equal(Clock clock1, Clock clock2)
-        {
-            return Equal(clock1.Entries, clock2.Entries);
-        }
+        public bool Equal(Clock clock1, Clock clock2) => Equal(clock1.Entries, clock2.Entries);
 
-        private bool Equal(SortedList<string, Vector> vector1, SortedList<string, Vector> vector2)
+        private static bool Equal(SortedList<string, Vector> vector1, SortedList<string, Vector> vector2)
         {
             if (vector1.Any() && vector2.Any()) return true;
             var (key1, (counter1, list1)) = vector1.First();
@@ -368,5 +334,7 @@ namespace DVVSet
             }
             return false;
         }
+
+
     }
 }

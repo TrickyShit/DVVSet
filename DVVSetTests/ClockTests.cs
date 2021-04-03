@@ -1,25 +1,23 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DVVSet;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace DVVSet.Tests
+namespace DVVSetTests
 {
     [TestClass()]
-    public class ClockTests
+    public class ClockTests:Dvvdotnet
     {
         [TestMethod()]
         public void NewWithHistoryTest()
         {
-            var test=new Clock();
-            var a = new Clock("v1");
-            var a1 = test.Create(a, "a");
-            //var b = test.NewWithHistory(Join(a1), "v2");
-            //var b1 = test.Update(b, a1, "b");
-            Assert.AreEqual(a.ToString(), "v1");
-            Assert.AreEqual(a1.ToString(), "[{a,1,[],1}]");
-
+            var a = ( new Clock("v1"));
+            Assert.AreEqual(ClockToString(a), "[][v1]");
+            var a1 = Create(a, "a");
+            Assert.AreEqual(ClockToString(a1), "[{a,1,[v1]}]");
+            var b = NewWithHistory(Join(a1), "v2");
+            Assert.AreEqual(ClockToString(b), "[{a,1,[]}][v2]");
+            var b1 = Update(b, a1, "b");
+            Assert.AreEqual(ClockToString(b1), "[{a,1,[]}][{b,1,[v2]}]");
         }
     }
 }

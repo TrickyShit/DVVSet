@@ -7,7 +7,6 @@ namespace DVVSet
     {
         public int Counter { get; set; }
         public List<string> Values { get; set; }
-        public string Id { get; set; }
 
         public Vector()
         {
@@ -20,10 +19,10 @@ namespace DVVSet
         }
 
 
-        public void Deconstruct(out int counter, out List<string> value)
+        public void Deconstruct(out int counter, out List<string> values)
         {
             counter = Counter;
-            value = Values;
+            values = Values;
         }
 
         //public override bool Equals(object obj)
@@ -38,6 +37,16 @@ namespace DVVSet
         public override int GetHashCode()
         {
             return HashCode.Combine(Counter, Values);
+        }
+
+        protected static void AddEntries(SortedList<string, Vector> entries, string id="", int counter=0, List<string> values=null)
+        {
+            var vector = new Vector
+            {
+                Counter = counter,
+                Values = values,
+            };
+            if (id != null) entries.Add(key: id, value: vector);
         }
     }
 }
