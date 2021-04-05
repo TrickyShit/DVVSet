@@ -12,6 +12,7 @@ namespace DVVSet
 {
     public class Dvvdotnet : Clock
     {
+        private static int falsecondition = -10;
 
         //*******************************************************************************//
         //*   NewList constructs a new clock set without causal history, and            *//
@@ -68,7 +69,7 @@ namespace DVVSet
         protected Clock Update(Clock clock1, Clock clock2, string theId)
         {
             // Sync both clocks without the new value
-            var entries1 = new SortedList<string,Vector>(clock1.Entries);
+            var entries1 = new SortedList<string, Vector>(clock1.Entries);
             var values1 = new List<string>(clock1.ClockValues);
             var entry = Entry(entries1, theId, values1);
             var c1 = new Clock { Entries = entry, ClockValues = new List<string>() };
@@ -92,8 +93,8 @@ namespace DVVSet
             {
                 var mergeCounter = vector[theId].Counter;
                 var mergeValues = vector[theId].Values;
-                int newCounter = mergeCounter + 1;
-                var mergeclock = Merge(theId, mergeCounter, mergeValues, newCounter, values);
+                //int newCounter = mergeCounter + 1;    was 4th position in Merge
+                var mergeclock = Merge(theId, mergeCounter, mergeValues, mergeCounter, values);
                 return new SortedList<string, Vector>
                     {{mergeclock.Keys[0], mergeclock.Values[0]}};
             }
@@ -121,24 +122,37 @@ namespace DVVSet
 
         private static SortedList<string, Vector> Merge(string id, int count1, List<string> values1, int count2, List<string> values2)
         {
-            var len1 = values1?.Count ?? 0;
-            var len2 = values2?.Count ?? 0;
             var result = new SortedList<string, Vector>();
-            List<string> values;
+            List<string> values=new List<string>();
             int count;
-            if (count1 >= count2)
+            if (count1 > count2)
             {
-                count = count1;
-                values = count1 - len1 >= count2 - len2 ? values1 : values1.GetRange(0, count1 - count2 + len2);
+                count = count1 + 1;
+                values.AddRange(values2);
+                values.AddRange(values1);
             }
-            else
+            else 
             {
-                count = count2;
-                values = count2 - len2 >= count1 - len1 ? values2 : values2.GetRange(0, count2 - count1 + len1);
+                count = count2 + 1;
+                values.AddRange(values1);
+                values.AddRange(values2);
             }
             var value = new Vector(count, values);
             result.Add(id, value);
             return result;
+            //if (count1 >= count2)
+            //{
+            //    count = count1;
+            //    values = count1 - len1 >= count2 - len2 ? values1 : values1.GetRange(0, count1 - count2 + len2);
+            //}
+            //else
+            //{
+            //    count = count2;
+            //    values = count2 - len2 >= count1 - len1 ? values2 : values2.GetRange(0, count2 - count1 + len1);
+            //}
+            //var value = new Vector(count, values);
+            //result.Add(id, value);
+            //return result;
         }
 
         //_________________________________________________________________
@@ -193,22 +207,26 @@ namespace DVVSet
             subList1.Remove(subList1.First().Key);
             var subList2 = new SortedList<string, Vector>(entry2);
             subList2.Remove(subList2.First().Key);
-            if (CompareEntries(entry2, entry1) > 0)
+            var comparepairs = ComparePairs(head2, head1);
+            if (comparepairs == 1)
             {
-                result.Add(head1.Key, head1.Value);
-                var toAppend = SyncEntries(subList1, entry2);
+                result.Add(head2.Key, head2.Value);
+                var toAppend = SyncEntries(subList1, subList2);
                 foreach (var i in toAppend) result.Add(i.Key, i.Value);
                 return result;
             }
-            if (CompareEntries(entry1, entry2) > 0)
+            if (comparepairs == -1)
             {
-                result.Add(head2.Key, head2.Value);
+                result.Add(head1.Key, head1.Value);
                 var toAppend = SyncEntries(subList2, subList1);
                 foreach (var i in toAppend) result.Add(i.Key, i.Value);
                 return result;
             }
-            var mergeResult = Merge(head1.Key, head1.Value.Counter, head1.Value.Values, head2.Value.Counter, head2.Value.Values);
-            foreach (var i in mergeResult) result.Add(i.Key, i.Value);
+            if (comparepairs == 0)
+            {
+                var mergeResult = Merge(head1.Key, head1.Value.Counter, head1.Value.Values, head2.Value.Counter, head2.Value.Values);
+                foreach (var i in mergeResult) result.Add(i.Key, i.Value);
+            }
             var syncResult = SyncEntries(subList1, subList2);
             foreach (var i in syncResult) result.Add(i.Key, i.Value);
             return result;
@@ -243,7 +261,15 @@ namespace DVVSet
             return 0;
         }
 
-
+        private static int ComparePairs(KeyValuePair<string, Vector> pair1, KeyValuePair<string, Vector> pair2)
+        {
+            if (!pair1.Key.Equals(pair2.Key)) return falsecondition;
+            if (pair1.Value.Counter > pair2.Value.Counter) return 1;
+            if (pair1.Value.Counter < pair2.Value.Counter) return -1;
+            if(pair1.Value.Values.Count>pair2.Value.Values.Count)return -1;
+            if(pair2.Value.Values.Count>pair1.Value.Values.Count)return 1;
+            return 0;
+        }
 
         /* Returns True if the first clock is causally older than
         * the second clock, thus values on the first clock are outdated.

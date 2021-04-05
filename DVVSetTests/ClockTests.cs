@@ -32,7 +32,7 @@ namespace DVVSetTests
             var a3 = Update(NewWithHistory(Join(a0), "v4"), a1, "b");
             Assert.AreEqual(ClockToString(a3), "[{a,2,[v2]}],[];[{b,1,[v4]}],[];");
             var a4 = Update(NewWithHistory(Join(a0), "v5"), a1, "a");
-            Assert.AreEqual(ClockToString(a4), "[{a,3,[v5,v2]}],[];");
+            Assert.AreEqual(ClockToString(a4), "[{a,3,[v5][v2]}],[];");     //little change to string because i don`t want change ClockToString :)
         }
     }
 }
