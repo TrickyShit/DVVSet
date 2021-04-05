@@ -58,17 +58,17 @@ namespace DVVSet
                     result += "[{" + key + "," + counter + ",";
                     if (value.Count == 0) result += "[]";
                     else result = value.Aggregate(result, (current, i) => current + "[" + i + "]");
-                    result += "}]";
-                    if (clock.ClockValues.Any()) result += "[" + clock.ClockValues[count] + "]";
+                    result += "}],";
+                    if (clock.ClockValues.Any()) result += "[" + clock.ClockValues[count] + "];";
+                    else result+="[];";
                     count++;
                 }
             }
             else
             {
-                if(clock.ClockValues.Any())return result+clock.ClockValues.Aggregate("[]", (current, i) => current + "[" + i + "]");
+                if(clock.ClockValues.Any())return result+clock.ClockValues.Aggregate("[],", (current, i) => current + "[" + i + "]")+";";
+                else return "[],[];";
             }
-
-            Console.WriteLine(result);
             return result;
         }
     }

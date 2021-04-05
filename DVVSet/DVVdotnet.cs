@@ -42,7 +42,7 @@ namespace DVVSet
         {
             var entries = clock.Entries;
             var values = clock.ClockValues;
-            var result = Entry(entries, theId, new List<string> {values[0]});
+            var result = Entry(entries, theId, new List<string> { values[0] });
             return new Clock(result, new List<string>());
         }
 
@@ -53,8 +53,8 @@ namespace DVVSet
             var result = new SortedList<string, Vector>();
             foreach (var (key, value) in clock.Entries)
             {
-                value.Values = new List<string>();
-                result.Add(key, value);
+                var resvalue = new Vector(value.Counter, new List<string>());
+                result.Add(key, resvalue);
             }
             return result;
         }
@@ -68,15 +68,12 @@ namespace DVVSet
         protected Clock Update(Clock clock1, Clock clock2, string theId)
         {
             // Sync both clocks without the new value
-            var entries1 = clock1.Entries;
-            var values1 = clock1.ClockValues;
-            var c1 = new Clock { Entries = entries1, ClockValues = new List<string>() };
-            var (entries, values) = SyncClocks(c1, clock2);
-            // We create a new event on the synced causal history,
-            // with the id I and the new value.
-            // The anonymous values that were synced still remain.
-            var entry = Entry(entries, theId, values1);
-            return new Clock(entry, values);
+            var entries1 = new SortedList<string,Vector>(clock1.Entries);
+            var values1 = new List<string>(clock1.ClockValues);
+            var entry = Entry(entries1, theId, values1);
+            var c1 = new Clock { Entries = entry, ClockValues = new List<string>() };
+            var (entries, _) = SyncClocks(c1, clock2);
+            return new Clock(entries, new List<string>());
         }
 
 
@@ -88,18 +85,17 @@ namespace DVVSet
             var result = new SortedList<string, Vector>();
             if (vector.Count == 0)
             {
-                result.Add(theId,new Vector(1, values));
+                result.Add(theId, new Vector(1, values));
                 return result;
             }
             if (vector.ContainsKey(theId))
             {
-                var (mergeCounter, mergeValues) = vector[theId];
+                var mergeCounter = vector[theId].Counter;
+                var mergeValues = vector[theId].Values;
                 int newCounter = mergeCounter + 1;
                 var mergeclock = Merge(theId, mergeCounter, mergeValues, newCounter, values);
                 return new SortedList<string, Vector>
-                    {{mergeclock.Keys[0], mergeclock.Values[0]
-    }
-};
+                    {{mergeclock.Keys[0], mergeclock.Values[0]}};
             }
             else
             {
@@ -161,22 +157,27 @@ namespace DVVSet
             if (clock1 == null) return clock2;
             if (clock2 == null) return clock1;
             var result = new Clock();
-            List<string> value;
             var (entries1, values1) = clock1;
             var (entries2, values2) = clock2;
-            if (Greater(entries1, entries2, false)) value = values1;
+            var syncvalue = new List<string>();
+            if (Less(clock2, clock1)) syncvalue = values1;
             else
-            if (Greater(entries2, entries1, false)) value = values2;
+            if (Less(clock1, clock2)) syncvalue = values2;
             else
             {
-                value = values1;
-                if (values1 == null)
+                syncvalue = values1;
+                if ((values1 != null) && (values2 != null))
                 {
-                    value = values2;
+                    syncvalue = values1;
+                    syncvalue.AddRange(values2);
                 }
-                else value.AddRange(values2);
+                else
+                {
+                    if (values2 != null) syncvalue = values2;
+                    else syncvalue = values1;
+                }
             }
-            result.ClockValues = value.Distinct().ToList();      //Duplicate values are removed here
+            result.ClockValues = syncvalue.Distinct().ToList();      //Duplicate values are removed here
             result.Entries = SyncEntries(entries1, entries2);
             return result;
         }
@@ -188,22 +189,22 @@ namespace DVVSet
             var result = new SortedList<string, Vector>();
             var head1 = new KeyValuePair<string, Vector>(entry1.First().Key, entry1.First().Value);
             var head2 = new KeyValuePair<string, Vector>(entry2.First().Key, entry2.First().Value);
-            var subList1 = entry1;
+            var subList1 = new SortedList<string, Vector>(entry1);
             subList1.Remove(subList1.First().Key);
-            var subList2 = entry2;
+            var subList2 = new SortedList<string, Vector>(entry2);
             subList2.Remove(subList2.First().Key);
             if (CompareEntries(entry2, entry1) > 0)
             {
                 result.Add(head1.Key, head1.Value);
                 var toAppend = SyncEntries(subList1, entry2);
-                result = (SortedList<string, Vector>)result.Concat(toAppend);
+                foreach (var i in toAppend) result.Add(i.Key, i.Value);
                 return result;
             }
             if (CompareEntries(entry1, entry2) > 0)
             {
                 result.Add(head2.Key, head2.Value);
-                var toAppend = SyncEntries(subList2, entry1);
-                result = (SortedList<string, Vector>)result.Concat(toAppend);
+                var toAppend = SyncEntries(subList2, subList1);
+                foreach (var i in toAppend) result.Add(i.Key, i.Value);
                 return result;
             }
             var mergeResult = Merge(head1.Key, head1.Value.Counter, head1.Value.Values, head2.Value.Counter, head2.Value.Values);
@@ -227,8 +228,8 @@ namespace DVVSet
                     return 1;
                 }
                 counter++;
-                var s1 = va.Value.Values.Count;     //length of values list in vector
-                var s2 = vb.Value.Values.Count;
+                var s1 = entries1.Count;     //length of values list in vector
+                var s2 = entries2.Count;
                 if ((s1 > 0) && (s2 > 0))
                 {
                     if (s1 > s2) return 1;
@@ -269,7 +270,6 @@ namespace DVVSet
                 {
                     return true;
                 }
-                counter++;
                 var value1 = node1.Key;
                 var value2 = node2.Key;
                 if (!value1.Equals(value2)) continue;
@@ -278,7 +278,8 @@ namespace DVVSet
                 if (dotNum1 > dotNum2) return true;
                 if (dotNum1 < dotNum2) return false;
                 if (string.Compare(value2, value1, StringComparison.Ordinal) > 0) continue;
-                return false;
+                if (vector1.Count > counter) return true;
+                if (vector2.Count > counter) return false;
             }
             return false;
         }
