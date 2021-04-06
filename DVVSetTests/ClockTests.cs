@@ -34,5 +34,27 @@ namespace DVVSetTests
             var a4 = Update(NewWithHistory(Join(a0), "v5"), a1, "a");
             Assert.AreEqual(ClockToString(a4), "[{a,3,[v5][v2]}],[];");     //little change to string because i don`t want change ClockToString :)
         }
+
+        [TestMethod()]
+        public void SyncTest()
+        {
+            var temp = new Clock(); 
+            var x = Create(temp, "x");              //{[{x,1,[]}],[]} as Erlang
+            var a = Create(new Clock("v1"),"a");
+            var y = Create(new Clock("v2"),"b");    
+            var a1 = Create(NewWithHistory(Join(a),"v2"), "a");
+            var a3 = Create(NewWithHistory(Join(a1),"v3"), "b");
+            var a4 = Create(NewWithHistory(Join(a1),"v3"), "c");
+            //F   = fun (L,R) -> L>R end;
+            var w = Create(temp, "a");           //W = {[{a,1,[]}],[]}
+            var z = Create(temp, "a");           //z = {[{a,2,[v2,v1]}],[]};
+            z.Entries.Values[0].Counter = 2;
+            z.Entries.Values[0].Values.Add("v2");
+            z.Entries.Values[0].Values.Add("v1");
+            Assert.AreEqual(ClockToString(SyncClocks(w, z)), "[{a,2,[v2]}],[];");
+            Assert.AreEqual(ClockToString(SyncClocks(z, w)), "[{a,2,[v2]}],[];");
+            Assert.AreEqual(ClockToString(SyncClocks(a4, a3)), "[{a,2,[]},{b,1,[v3]},{c,1,[v3]}],[];");
+
+        }
     }
 }

@@ -15,7 +15,11 @@ namespace DVVSet
         public SortedList<string, Vector> Entries { get; set; }
         public List<string> ClockValues { get; set; }
 
-        public Clock() { }
+        public Clock() 
+        { 
+            Entries = new SortedList<string, Vector>();
+            ClockValues = new List<string>();
+        }
 
         public Clock(SortedList<string, Vector> entries)
         {
@@ -70,6 +74,35 @@ namespace DVVSet
                 else return "[],[];";
             }
             return result;
+        }
+
+        private static int CompareEntries(SortedList<string, Vector> entries1, SortedList<string, Vector> entries2)
+        {
+            int counter = 0;
+            foreach (var va in entries1)
+            {
+                var vb = entries2.ToArray()[counter];
+                try
+                {
+                }
+                catch (Exception)               //if size(va) > size(vb) and all values in vb are compared => return 1
+                {
+                    return 1;
+                }
+                counter++;
+                var s1 = entries1.Count;     //length of values list in vector
+                var s2 = entries2.Count;
+                if ((s1 > 0) && (s2 > 0))
+                {
+                    if (s1 > s2) return 1;
+                    if (s1 == s2) continue;
+                    return -1;
+                }
+                if (s1 != 0) return 1;
+                if (s2 != 0) return -1;
+                return 0;
+            }
+            return 0;
         }
     }
 }
