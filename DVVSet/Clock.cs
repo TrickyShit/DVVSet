@@ -15,8 +15,8 @@ namespace DVVSet
         public SortedList<string, Vector> Entries { get; set; }
         public List<string> ClockValues { get; set; }
 
-        public Clock() 
-        { 
+        public Clock()
+        {
             Entries = new SortedList<string, Vector>();
             ClockValues = new List<string>();
         }
@@ -30,7 +30,7 @@ namespace DVVSet
         public Clock(string value)
         {
             Entries = new SortedList<string, Vector>();
-            ClockValues = new List<string> {value};
+            ClockValues = new List<string> { value };
         }
 
         public Clock(List<string> clockValues)
@@ -53,7 +53,7 @@ namespace DVVSet
 
         protected static string ClockToString(Clock clock)
         {
-            var result="";
+            var result = "";
             if (clock.Entries.Count > 0)
             {
                 int count = 0;
@@ -63,17 +63,14 @@ namespace DVVSet
                     if (value.Count == 0) result += "[]";
                     else result = value.Aggregate(result, (current, i) => current + "[" + i + "]");
                     result += "}],";
-                    if (clock.ClockValues.Any()) result += "[" + clock.ClockValues[count] + "];";
-                    else result+="[];";
+                    //if (clock.ClockValues.Any()) result += "[" + clock.ClockValues[count] + "];";
+                    //else result+="[];";
                     count++;
                 }
             }
-            else
-            {
-                if(clock.ClockValues.Any())return result+clock.ClockValues.Aggregate("[],", (current, i) => current + "[" + i + "]")+";";
-                else return "[],[];";
-            }
-            return result;
+            else result += "[],";
+            if (clock.ClockValues.Any()) return result + "[" + clock.ClockValues.Aggregate((current, i) => current + "[" + i + "]") + "];";
+            else return result + "[];";
         }
 
         private static int CompareEntries(SortedList<string, Vector> entries1, SortedList<string, Vector> entries2)

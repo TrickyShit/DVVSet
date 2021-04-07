@@ -1,6 +1,7 @@
+Dotted-version vector clocks
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
-%%%%%%%%%% STRUCTURE %%%%%%%%%%  
+%%%%%%%%%% STRUCTURE %%%%%%%%%%%%%%  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
   
 clock()         :: {entries(), values()}.  

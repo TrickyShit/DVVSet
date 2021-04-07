@@ -12,7 +12,11 @@ namespace DVVSet
 {
     public class Dvvdotnet : Clock
     {
-        const int falsecondition = -10;
+        const int differentkeys = -100;
+        const int counter1isbigger = 1;
+        const int counter1islesser = -1;
+        const int values1more = 10;
+        const int values1fewer = -10;
 
         //*******************************************************************************//
         //*   NewList constructs a new clock set without causal history, and            *//
@@ -164,7 +168,7 @@ namespace DVVSet
         //* Synchronizes a list of clocks using Sync().                                 *// 
         //* It discards (causally) outdated values, while merging all causal histories. *//
 
-        public Clock SyncClocks(Clock clock1, Clock clock2)
+        public static Clock SyncClocks(Clock clock1, Clock clock2)
         {
             if (clock1 == null) return clock2;
             if (clock2 == null) return clock1;
@@ -193,7 +197,7 @@ namespace DVVSet
             return result;
         }
 
-        public SortedList<string, Vector> SyncEntries(SortedList<string, Vector> entry1, SortedList<string, Vector> entry2)
+        public static SortedList<string, Vector> SyncEntries(SortedList<string, Vector> entry1, SortedList<string, Vector> entry2)
         {
             if (!entry1.Any()) return entry2;
             if (!entry2.Any()) return entry1;
@@ -221,19 +225,53 @@ namespace DVVSet
                 }
                 else head2 = new KeyValuePair<string, Vector>();
 
-                var comparePairs = ComparePairs(head2, head1);
-                if (comparePairs == 1)
+                if(head1.Key==null)
+                {
+                    result.Add(head2.Key, head2.Value);
+                    continue;
+                }
+
+                if (head2.Key==null)
+                {
+                    result.Add(head1.Key, head1.Value);
+                    continue;
+                }
+
+                var comparePairs = ComparePairs(head1, head2);
+
+                if (comparePairs == differentkeys)     //TODO перебор Keys в парах, выявление зависящих друг от друга (head1 head2 or head2 head1)
+                {
+                    result.Add(head2.Key, head2.Value);
+                    result.Add(head1.Key, head1.Value);
+                }
+                if (comparePairs == counter1isbigger)
+                {
+                    //head1.Value.Counter++;
+                    result.Add(head1.Key, head1.Value);
+                }
+
+                if (comparePairs == counter1islesser)
+                {
+                    //head2.Value.Counter++;
+                    result.Add(head2.Key, head2.Value);
+                }
+                if (comparePairs == values1more)
                 {
                     result.Add(head2.Key, head2.Value);
                 }
-                if (comparePairs == -1)
+                if (comparePairs == values1fewer)
                 {
                     result.Add(head1.Key, head1.Value);
                 }
+
                 if (comparePairs == 0)
                 {
-                    var mergePair = Merge(head1.Key, head1.Value.Counter, head1.Value.Values, head2.Value.Counter, head2.Value.Values);
-                    result.Add(mergePair.Key, mergePair.Value);
+                    if (!head1.Value.Values.Equals(head2.Value.Values)&&head1.Value.Values.Count>0)
+                    {
+                        var headMerge=Merge(head1.Key, head1.Value.Counter, head1.Value.Values, head2.Value.Counter, head2.Value.Values);
+                        result.Add(headMerge.Key, headMerge.Value);
+                    }
+                    else result.Add(head1.Key, head1.Value);
                 }
                 if (entry2.Count > 0) entry2.RemoveAt(0);
                 if (entry1.Count > 0) entry1.RemoveAt(0);
@@ -243,13 +281,11 @@ namespace DVVSet
 
         private static int ComparePairs(KeyValuePair<string, Vector> pair1, KeyValuePair<string, Vector> pair2)
         {
-            if (pair1.Key == null) return -1;
-            if (pair2.Key == null) return 1;
-            if (!pair1.Key.Equals(pair2.Key)) return falsecondition;
-            if (pair1.Value.Counter > pair2.Value.Counter) return 1;
-            if (pair1.Value.Counter < pair2.Value.Counter) return -1;
-            if (pair1.Value.Values.Count > pair2.Value.Values.Count) return -1;
-            if (pair2.Value.Values.Count > pair1.Value.Values.Count) return 1;
+            if (!pair1.Key.Equals(pair2.Key)) return differentkeys;
+            if (pair1.Value.Counter > pair2.Value.Counter) return counter1isbigger;
+            if (pair1.Value.Counter < pair2.Value.Counter) return counter1islesser;
+            if (pair1.Value.Values.Count > pair2.Value.Values.Count) return values1more;
+            if (pair2.Value.Values.Count > pair1.Value.Values.Count) return values1fewer;
             return 0;
         }
 
