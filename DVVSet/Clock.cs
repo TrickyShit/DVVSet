@@ -51,9 +51,16 @@ namespace DVVSet
             values = ClockValues;
         }
 
-        protected static string ClockToString(Clock clock)
+        protected static string ClockToString(object tostring)
         {
             var result = "";
+            var clock=new Clock();
+            if (tostring is SortedList<string, Vector>)
+            {
+                clock.Entries = (SortedList<string, Vector>)tostring;
+                clock.ClockValues = new List<string>();
+            }
+            if(tostring is Clock) clock=(Clock)tostring;
             if (clock.Entries.Count > 0)
             {
                 int count = 0;

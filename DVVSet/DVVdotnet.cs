@@ -211,27 +211,25 @@ namespace DVVSet
             {
                 if (entry1.Count > 0)
                 {
-                    head1 = new KeyValuePair<string, Vector>(entry1.First().Key, entry1.First().Value);
-                    if (head1.Value.Values.Count > 1)
-                        for (int i = 1; i < head1.Value.Values.Count; i++) head1.Value.Values.RemoveAt(i);    //lasts newest value only
+                    NewVector(entry1, out KeyValuePair<string, Vector> item, out Vector vector);
+                    head1 = new KeyValuePair<string, Vector>(item.Key, vector);
                 }
                 else head1 = new KeyValuePair<string, Vector>();
 
                 if (entry2.Count > 0)
                 {
-                    head2 = new KeyValuePair<string, Vector>(entry2.First().Key, entry2.First().Value);
-                    if (head2.Value.Values.Count > 1)
-                        for (int i = 1; i < head2.Value.Values.Count; i++) head2.Value.Values.RemoveAt(i);    //lasts newest value only
+                    NewVector(entry2, out KeyValuePair<string, Vector> item, out Vector vector);
+                    head2 = new KeyValuePair<string, Vector>(item.Key, vector);
                 }
                 else head2 = new KeyValuePair<string, Vector>();
 
-                if(head1.Key==null)
+                if (head1.Key == null)
                 {
                     result.Add(head2.Key, head2.Value);
                     continue;
                 }
 
-                if (head2.Key==null)
+                if (head2.Key == null)
                 {
                     result.Add(head1.Key, head1.Value);
                     continue;
@@ -266,9 +264,9 @@ namespace DVVSet
 
                 if (comparePairs == 0)
                 {
-                    if (!head1.Value.Values.Equals(head2.Value.Values)&&head1.Value.Values.Count>0)
+                    if (!head1.Value.Values.Equals(head2.Value.Values) && head1.Value.Values.Count > 0)
                     {
-                        var headMerge=Merge(head1.Key, head1.Value.Counter, head1.Value.Values, head2.Value.Counter, head2.Value.Values);
+                        var headMerge = Merge(head1.Key, head1.Value.Counter, head1.Value.Values, head2.Value.Counter, head2.Value.Values);
                         result.Add(headMerge.Key, headMerge.Value);
                     }
                     else result.Add(head1.Key, head1.Value);
@@ -279,11 +277,24 @@ namespace DVVSet
             return result;
         }
 
+        private static void NewVector(SortedList<string, Vector> entry1, out KeyValuePair<string, Vector> item, out Vector vector)
+        {
+            item = entry1.First();
+            vector = new Vector
+            {
+                Counter = item.Value.Counter,
+                Values = item.Value.Values.Count > 0 ? new List<string> { item.Value.Values[0] } : new List<string>()
+            };
+        }
+
         private static int ComparePairs(KeyValuePair<string, Vector> pair1, KeyValuePair<string, Vector> pair2)
         {
             if (!pair1.Key.Equals(pair2.Key)) return differentkeys;
             if (pair1.Value.Counter > pair2.Value.Counter) return counter1isbigger;
             if (pair1.Value.Counter < pair2.Value.Counter) return counter1islesser;
+            if (pair1.Value.Values == null && pair2.Value.Values == null) return 0;
+            if (pair1.Value.Values == null) return values1fewer;
+            if (pair2.Value.Values == null) return values1more;
             if (pair1.Value.Values.Count > pair2.Value.Values.Count) return values1more;
             if (pair2.Value.Values.Count > pair1.Value.Values.Count) return values1fewer;
             return 0;
