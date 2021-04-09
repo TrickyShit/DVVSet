@@ -39,11 +39,18 @@ namespace DVVSet
             ClockValues = clockValues;
         }
 
-        public Clock(SortedList<string, Vector> entries, List<string> clockValues) : this(clockValues)
+        public Clock(SortedList<string, Vector> entries, List<string> clockValues)
         {
             Entries = entries;
             ClockValues = clockValues;
         }
+
+        public Clock(SortedList<string, Vector> entries, string value)
+        {
+            Entries = entries;
+            ClockValues = new List<string> { value };
+        }
+
 
         public void Deconstruct(out SortedList<string, Vector> entries, out List<string> values)
         {
@@ -51,16 +58,19 @@ namespace DVVSet
             values = ClockValues;
         }
 
-        protected static string ClockToString(object tostring)
+        protected static string ClockToString(object clocks)
         {
             var result = "";
-            var clock=new Clock();
-            if (tostring is SortedList<string, Vector>)
+            var clock = new Clock();
+            if (clocks.GetType()==typeof(SortedList<string, Vector>))
             {
-                clock.Entries = (SortedList<string, Vector>)tostring;
-                clock.ClockValues = new List<string>();
+                    clock.Entries = clocks as SortedList<string, Vector>;
+                    clock.ClockValues = new List<string>();
             }
-            if(tostring is Clock) clock=(Clock)tostring;
+            if (clocks.GetType() == typeof(Clock))
+            {
+                clock = clocks as Clock;
+            }
             if (clock.Entries.Count > 0)
             {
                 int count = 0;
@@ -78,35 +88,6 @@ namespace DVVSet
             else result += "[],";
             if (clock.ClockValues.Any()) return result + "[" + clock.ClockValues.Aggregate((current, i) => current + "[" + i + "]") + "];";
             else return result + "[];";
-        }
-
-        private static int CompareEntries(SortedList<string, Vector> entries1, SortedList<string, Vector> entries2)
-        {
-            int counter = 0;
-            foreach (var va in entries1)
-            {
-                var vb = entries2.ToArray()[counter];
-                try
-                {
-                }
-                catch (Exception)               //if size(va) > size(vb) and all values in vb are compared => return 1
-                {
-                    return 1;
-                }
-                counter++;
-                var s1 = entries1.Count;     //length of values list in vector
-                var s2 = entries2.Count;
-                if ((s1 > 0) && (s2 > 0))
-                {
-                    if (s1 > s2) return 1;
-                    if (s1 == s2) continue;
-                    return -1;
-                }
-                if (s1 != 0) return 1;
-                if (s2 != 0) return -1;
-                return 0;
-            }
-            return 0;
         }
     }
 }

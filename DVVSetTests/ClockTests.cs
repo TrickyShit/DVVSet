@@ -12,22 +12,22 @@ namespace DVVSetTests
         {
             var a = new Clock("v1");
             var a1 = Create(a, "a");
-            var b = NewWithHistory(Join(a1), "v2");
+            var b = new Clock(Join(a1), "v2");
             var b1 = Update(b, a1, "b");
-            Assert.AreEqual(expected: ClockToString(a), actual: "[],[v1];");
-            Assert.AreEqual(expected: ClockToString(a1), actual: "[{a,1,[v1]}],[];");
-            Assert.AreEqual(expected: ClockToString(b), actual: "[{a,1,[]}],[v2];");
-            Assert.AreEqual(expected: ClockToString(b1), actual: "[{a,1,[]}],[{b,1,[v2]}],[];");
+            Assert.AreEqual(ClockToString(a), "[],[v1];");
+            Assert.AreEqual(ClockToString(a1), "[{a,1,[v1]}],[];");
+            Assert.AreEqual(ClockToString(b), "[{a,1,[]}],[v2];");
+            Assert.AreEqual(ClockToString(b1), "[{a,1,[]}],[{b,1,[v2]}],[];");
         }
 
         [TestMethod()]
         public void UpdateTest()
         {
             var a0 = Create(new Clock("v1"), "a");
-            var a1 = Update(NewWithHistory(Join(a0), "v2"), a0, "a");
-            var a2 = Update(NewWithHistory(Join(a1), "v3"), a1, "b");
-            var a3 = Update(NewWithHistory(Join(a0), "v4"), a1, "b");
-            var a4 = Update(NewWithHistory(Join(a0), "v5"), a1, "a");
+            var a1 = Update(new Clock(Join(a0), "v2"), a0, "a");
+            var a2 = Update(new Clock(Join(a1), "v3"), a1, "b");
+            var a3 = Update(new Clock(Join(a0), "v4"), a1, "b");
+            var a4 = Update(new Clock(Join(a0), "v5"), a1, "a");
             Assert.AreEqual(ClockToString(a0), "[{a,1,[v1]}],[];");
             Assert.AreEqual(ClockToString(a1), "[{a,2,[v2]}],[];");
             Assert.AreEqual(ClockToString(a2), "[{a,2,[]}],[{b,1,[v3]}],[];");
@@ -39,15 +39,15 @@ namespace DVVSetTests
         public void SyncTest()
         {
             var temp = new Clock();
-            var x = Create(temp, "x");              //{[{x,1,[]}],[]} as Erlang
-            var a = Create(new Clock("v1"), "a");
-            var y = Create(new Clock("v2"), "b");
-            var a1 = Create(NewWithHistory(Join(a), "v2"), "a");
-            var a3 = Create(NewWithHistory(Join(a1), "v3"), "b");
-            var a4 = Create(NewWithHistory(Join(a1), "v3"), "c");
+            var x = Create(temp, "x");              //{[{x,1,[]}],[] as Erlang
+            var a = Create(new Clock("v1"), "a");   //{[{a,1,[v1]}],[]
+            var y = Create(new Clock("v2"), "b");   
+            var a1 = Create(new Clock(Join(a), "v2"), "a");
+            var a3 = Create(new Clock(Join(a1), "v3"), "b");
+            var a4 = Create(new Clock(Join(a1), "v3"), "c");
             //F   = fun (L,R) -> L>R end;
             var w = Create(temp, "a");           //W = {[{a,1,[]}],[]}
-            var z = Create(temp, "a");           //z = {[{a,2,[v2,v1]}],[]};
+            var z = Create(temp, "a");           //z = {[{a,2,[v2][v1]}],[]};
             z.Entries.Values[0].Counter = 2;
             z.Entries.Values[0].Values.Add("v2");
             z.Entries.Values[0].Values.Add("v1");

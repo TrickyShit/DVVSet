@@ -1,8 +1,6 @@
-// 
 // A C# implementation of *compact* Dotted Version Vectors, which
 // provides a container for a set of concurrent values (siblings) with causal
 // order information.
-// 
 
 using System;
 using System.Collections.Generic;
@@ -18,38 +16,10 @@ namespace DVVSet
         const int values1more = 10;
         const int values1fewer = -10;
 
-        //*******************************************************************************//
-        //*   NewList constructs a new clock set without causal history, and            *//
-        //*   receives one value or list of values that goes to the anonymous list.     *//
-        //*******************************************************************************//
-        public static Clock NewList(List<string> values = null, string value = "")
-        {
-            if (value == "") return new Clock(values);
-            values = new List<string> { value };
-            return new Clock(values);
-        }
-
-        //* NewWithHistory constructs a new clock set with the causal
-        //* history of the given version vector / vector clock,
-        //* and receives one value that goes to the anonymous list.
-        //* The version vector SHOULD BE the output of join.
-
-        protected static Clock NewWithHistory(SortedList<string, Vector> vector, string value = "", List<string> values = null)
-        {
-            if (value != "") values = new List<string> { value };
-            return new Clock(vector, values);
-        }
-
         // Method Create advances the causal history with the given id.
         // The new value is the *anonymous dot* of the clock.
         // The client clock SHOULD BE a direct result of method NewList.
-        protected Clock Create(Clock clock, string theId)
-        {
-            var entries = new SortedList<string, Vector>(clock.Entries);
-            var values = new List<string>(clock.ClockValues);
-            var result = Entry(entries, theId, values);
-            return new Clock(result, new List<string>());
-        }
+        protected Clock Create(Clock clock, string theId) => new Clock(Entry(clock, theId), new List<string>());
 
         //* Return a version vector that represents the causal history.
 
@@ -58,8 +28,7 @@ namespace DVVSet
             var result = new SortedList<string, Vector>();
             foreach (var (key, value) in clock.Entries)
             {
-                var resvalue = new Vector(value.Counter, new List<string>());
-                result.Add(key, resvalue);
+                result.Add(key, new Vector(value.Counter, new List<string>()));
             }
             return result;
         }
@@ -73,20 +42,20 @@ namespace DVVSet
         protected Clock Update(Clock clock1, Clock clock2, string theId)
         {
             // Sync both clocks without the new value
-            var entries1 = new SortedList<string, Vector>(clock1.Entries);
-            var values1 = new List<string>(clock1.ClockValues);
-            var entry = Entry(entries1, theId, values1);
-            var c1 = new Clock { Entries = entry, ClockValues = new List<string>() };
+            var c1 = new Clock (Entry(clock1, theId), new List<string>());
             var (entries, _) = SyncClocks(c1, clock2);
             return new Clock(entries, new List<string>());
         }
 
-
         // We create a new event on the synced causal history,
         // with the id and the new value.
         // The anonymous values that were synced still remain.
-        private SortedList<string, Vector> Entry(SortedList<string, Vector> vector, string theId, List<string> values)
+        private SortedList<string, Vector> Entry(Clock clock, string theId)
         {
+            var vector = new SortedList<string, Vector>();
+            foreach (var i in clock.Entries)vector.Add(i.Key, i.Value);
+            var values= new List<string>();
+            foreach (var i in clock.ClockValues) values.Add(i);
             var result = new SortedList<string, Vector>();
             if (vector.Count == 0)
             {
@@ -97,7 +66,6 @@ namespace DVVSet
             {
                 var mergeCounter = vector[theId].Counter;
                 var mergeValues = vector[theId].Values;
-                //int newCounter = mergeCounter + 1;    was 4th position in Merge
                 var mergeclock = Merge(theId, mergeCounter, mergeValues, mergeCounter, values);
                 return new SortedList<string, Vector> { { mergeclock.Key, mergeclock.Value } };
             }
@@ -115,9 +83,9 @@ namespace DVVSet
                 }
             }
             result.Add(vector.Keys[0], vector.Values[0]);
-            var eventValue = vector;
+            var eventValue = new SortedList<string, Vector>(vector);
             eventValue.RemoveAt(0);
-            var eventV = Entry(eventValue, theId, values);
+            var eventV = Entry(new Clock(eventValue, values), theId);
             foreach (var (key, vector1) in eventV)
                 result.Add(key, vector1);
             return result;
@@ -142,19 +110,6 @@ namespace DVVSet
             var value = new Vector(count, values);
             var result = new KeyValuePair<string, Vector>(id, value);
             return result;
-            //if (count1 >= count2)
-            //{
-            //    count = count1;
-            //    values = count1 - len1 >= count2 - len2 ? values1 : values1.GetRange(0, count1 - count2 + len2);
-            //}
-            //else
-            //{
-            //    count = count2;
-            //    values = count2 - len2 >= count1 - len1 ? values2 : values2.GetRange(0, count2 - count1 + len1);
-            //}
-            //var value = new Vector(count, values);
-            //result.Add(id, value);
-            //return result;
         }
 
         //_________________________________________________________________
@@ -189,10 +144,9 @@ namespace DVVSet
                 else
                 {
                     if (values2.Count > 0) syncvalue = values2;
-                    else syncvalue = values1;
                 }
             }
-            result.ClockValues = syncvalue;//syncvalue.Distinct().ToList();      //Duplicate values are removed here
+            result.ClockValues = syncvalue;
             result.Entries = SyncEntries(new SortedList<string, Vector>(entries1), new SortedList<string, Vector>(entries2));
             return result;
         }
@@ -235,41 +189,32 @@ namespace DVVSet
                     continue;
                 }
 
-                var comparePairs = ComparePairs(head1, head2);
-
-                if (comparePairs == differentkeys)     //TODO перебор Keys в парах, выявление зависящих друг от друга (head1 head2 or head2 head1)
+                switch (ComparePairs(head1, head2))
                 {
-                    result.Add(head2.Key, head2.Value);
-                    result.Add(head1.Key, head1.Value);
-                }
-                if (comparePairs == counter1isbigger)
-                {
-                    //head1.Value.Counter++;
-                    result.Add(head1.Key, head1.Value);
-                }
-
-                if (comparePairs == counter1islesser)
-                {
-                    //head2.Value.Counter++;
-                    result.Add(head2.Key, head2.Value);
-                }
-                if (comparePairs == values1more)
-                {
-                    result.Add(head2.Key, head2.Value);
-                }
-                if (comparePairs == values1fewer)
-                {
-                    result.Add(head1.Key, head1.Value);
-                }
-
-                if (comparePairs == 0)
-                {
-                    if (!head1.Value.Values.Equals(head2.Value.Values) && head1.Value.Values.Count > 0)
-                    {
-                        var headMerge = Merge(head1.Key, head1.Value.Counter, head1.Value.Values, head2.Value.Counter, head2.Value.Values);
-                        result.Add(headMerge.Key, headMerge.Value);
-                    }
-                    else result.Add(head1.Key, head1.Value);
+                    case differentkeys:
+                        result.Add(head2.Key, head2.Value);
+                        result.Add(head1.Key, head1.Value);
+                        break;
+                    case counter1isbigger:
+                        result.Add(head1.Key, head1.Value);
+                        break;
+                    case counter1islesser:
+                        result.Add(head2.Key, head2.Value);
+                        break;
+                    case values1more:
+                        result.Add(head2.Key, head2.Value);
+                        break;
+                    case values1fewer:
+                        result.Add(head1.Key, head1.Value);
+                        break;
+                    default:
+                        if (!head1.Value.Values.Equals(head2.Value.Values) && head1.Value.Values.Count > 0)
+                        {
+                            var headMerge = Merge(head1.Key, head1.Value.Counter, head1.Value.Values, head2.Value.Counter, head2.Value.Values);
+                            result.Add(headMerge.Key, headMerge.Value);
+                        }
+                        else result.Add(head1.Key, head1.Value);
+                        break;
                 }
                 if (entry2.Count > 0) entry2.RemoveAt(0);
                 if (entry1.Count > 0) entry1.RemoveAt(0);
