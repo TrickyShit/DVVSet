@@ -16,20 +16,12 @@ namespace DVVSet
         const int values1more = 10;
         const int values1fewer = -10;
 
-        // Method Create advances the causal history with the given id.
-        // The new value is the *anonymous dot* of the clock.
-        // The client clock SHOULD BE a direct result of method NewList.
-        protected Clock Create(Clock clock, string theId) => new Clock(Entry(clock, theId), new List<string>());
-
         //* Return a version vector that represents the causal history.
 
         protected static SortedList<string, Vector> Join(Clock clock)
         {
             var result = new SortedList<string, Vector>();
-            foreach (var (key, value) in clock.Entries)
-            {
-                result.Add(key, new Vector(value.Counter, new List<string>()));
-            }
+            foreach ((string key, Vector value) in clock.Entries)result.Add(key, new Vector(value.Counter, new List<string>()));
             return result;
         }
 
@@ -39,10 +31,15 @@ namespace DVVSet
         * The first clock SHOULD BE a direct result of new/2, which is intended to be the client clock with
         * the new value in the *anonymous dot* while the second clock is from the local server.*/
 
-        protected Clock Update(Clock clock1, Clock clock2, string theId)
+        protected Clock Update(Clock clock1, string theId, Clock clock2 = null)
         {
             // Sync both clocks without the new value
-            var c1 = new Clock (Entry(clock1, theId), new List<string>());
+            var c1 = new Clock
+            {
+                Entries = Entry(clock1, theId),
+                ClockValues = new List<string>()
+            };
+            if (clock2 == null) return c1;
             var (entries, _) = SyncClocks(c1, clock2);
             return new Clock(entries, new List<string>());
         }
@@ -53,8 +50,8 @@ namespace DVVSet
         private SortedList<string, Vector> Entry(Clock clock, string theId)
         {
             var vector = new SortedList<string, Vector>();
-            foreach (var i in clock.Entries)vector.Add(i.Key, i.Value);
-            var values= new List<string>();
+            foreach (var i in clock.Entries) vector.Add(i.Key, i.Value);
+            var values = new List<string>();
             foreach (var i in clock.ClockValues) values.Add(i);
             var result = new SortedList<string, Vector>();
             if (vector.Count == 0)
@@ -94,18 +91,25 @@ namespace DVVSet
         private static KeyValuePair<string, Vector> Merge(string id, int count1, List<string> values1, int count2, List<string> values2)
         {
             List<string> values = new List<string>();
-            int count;
-            if (count1 > count2)
-            {
-                count = count1 + 1;
-                values.AddRange(values2);
-                values.AddRange(values1);
-            }
+            int count = count1 > count2 ? count1 + 1 : count2 + 1;
+            int comparison;
+            if (values1.Count == 0) values.Add(values2[0]);
+            else
+            if (values2.Count == 0) values.Add(values1[0]);
             else
             {
-                count = count2 + 1;
-                values.AddRange(values1);
-                values.AddRange(values2);
+                comparison = String.Compare(values1[0], values2[0], comparisonType: StringComparison.OrdinalIgnoreCase);
+                if (comparison > 0)
+                {
+                    values.Add(values1[0]);
+                    values.Add(values2[0]);
+                }
+                else if (comparison < 0)
+                {
+                    values.Add(values2[0]);
+                    values.Add(values1[0]);
+                }
+                else values.Add(values1[0]);
             }
             var value = new Vector(count, values);
             var result = new KeyValuePair<string, Vector>(id, value);
@@ -153,6 +157,13 @@ namespace DVVSet
 
         public static SortedList<string, Vector> SyncEntries(SortedList<string, Vector> entry1, SortedList<string, Vector> entry2)
         {
+            static KeyValuePair<string, Vector> KeyValue(SortedList<string, Vector> entry)
+            {
+                var temp = entry.First();
+                Vector newValue = new Vector(temp.Value.Counter, temp.Value.Values);
+                return new KeyValuePair<string, Vector>(temp.Key, newValue);
+            }
+
             if (!entry1.Any()) return entry2;
             if (!entry2.Any()) return entry1;
             var result = new SortedList<string, Vector>();
@@ -163,19 +174,8 @@ namespace DVVSet
             KeyValuePair<string, Vector> head2;
             for (int c = 0; c < count; c++)
             {
-                if (entry1.Count > 0)
-                {
-                    NewVector(entry1, out KeyValuePair<string, Vector> item, out Vector vector);
-                    head1 = new KeyValuePair<string, Vector>(item.Key, vector);
-                }
-                else head1 = new KeyValuePair<string, Vector>();
-
-                if (entry2.Count > 0)
-                {
-                    NewVector(entry2, out KeyValuePair<string, Vector> item, out Vector vector);
-                    head2 = new KeyValuePair<string, Vector>(item.Key, vector);
-                }
-                else head2 = new KeyValuePair<string, Vector>();
+                head1 = entry1.Count > 0 ? KeyValue(entry1) : new KeyValuePair<string, Vector>();
+                head2 = entry2.Count > 0 ? KeyValue(entry2) : new KeyValuePair<string, Vector>();
 
                 if (head1.Key == null)
                 {
@@ -188,7 +188,9 @@ namespace DVVSet
                     result.Add(head1.Key, head1.Value);
                     continue;
                 }
-
+                List<string> temp;
+                var headresult = new SortedList<string, Vector>();
+                KeyValuePair<string, Vector> mergepair;
                 switch (ComparePairs(head1, head2))
                 {
                     case differentkeys:
@@ -196,41 +198,48 @@ namespace DVVSet
                         result.Add(head1.Key, head1.Value);
                         break;
                     case counter1isbigger:
-                        result.Add(head1.Key, head1.Value);
+                        headresult.Add(head1.Key, head1.Value);
+                        temp = new List<string> { headresult.Values[0].Values[0] };
+                        headresult.Values[0].Values = temp;
                         break;
                     case counter1islesser:
-                        result.Add(head2.Key, head2.Value);
+                        headresult.Add(head2.Key, head2.Value);
+                        temp = new List<string> { headresult.Values[0].Values[0] };
+                        headresult.Values[0].Values = temp;
                         break;
                     case values1more:
-                        result.Add(head2.Key, head2.Value);
+                        if (head2.Value.Values.Count > 0 && head1.Value.Values.Count > 0)
+                        {
+                            mergepair = Merge(head2.Key, head2.Value.Counter, head2.Value.Values, head1.Value.Counter, head1.Value.Values);
+                            headresult.Add(mergepair.Key, mergepair.Value);
+                        }
+                        else
+                            if (head1.Value.Values.Count > 0) headresult.Values[0].Values.Add(head1.Value.Values[0]);
                         break;
                     case values1fewer:
-                        result.Add(head1.Key, head1.Value);
+                        if (head2.Value.Values.Count > 0 && head1.Value.Values.Count > 0)
+                        {
+                            mergepair = Merge(head2.Key, head2.Value.Counter, head2.Value.Values, head1.Value.Counter, head1.Value.Values);
+                            headresult.Add(mergepair.Key, mergepair.Value);
+                        }
+                        else headresult.Add(head1.Key, head1.Value);
                         break;
                     default:
                         if (!head1.Value.Values.Equals(head2.Value.Values) && head1.Value.Values.Count > 0)
                         {
-                            var headMerge = Merge(head1.Key, head1.Value.Counter, head1.Value.Values, head2.Value.Counter, head2.Value.Values);
-                            result.Add(headMerge.Key, headMerge.Value);
+                            mergepair = Merge(head1.Key, head1.Value.Counter, head1.Value.Values, head2.Value.Counter, head2.Value.Values);
+                            result.Add(mergepair.Key, mergepair.Value);
                         }
                         else result.Add(head1.Key, head1.Value);
                         break;
                 }
+                if (headresult.Count > 0) result.Add(headresult.Keys[0], headresult.Values[0]);
                 if (entry2.Count > 0) entry2.RemoveAt(0);
                 if (entry1.Count > 0) entry1.RemoveAt(0);
             }
             return result;
         }
 
-        private static void NewVector(SortedList<string, Vector> entry1, out KeyValuePair<string, Vector> item, out Vector vector)
-        {
-            item = entry1.First();
-            vector = new Vector
-            {
-                Counter = item.Value.Counter,
-                Values = item.Value.Values.Count > 0 ? new List<string> { item.Value.Values[0] } : new List<string>()
-            };
-        }
 
         private static int ComparePairs(KeyValuePair<string, Vector> pair1, KeyValuePair<string, Vector> pair2)
         {
@@ -335,7 +344,5 @@ namespace DVVSet
             }
             return false;
         }
-
-
     }
 }

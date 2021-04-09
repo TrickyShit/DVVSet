@@ -6,12 +6,12 @@ Original code: <https://github.com/ricardobcl/Dotted-Version-Vectors>
 ## **STRUCTURE**
 
 **clock()** :: {entries(), values()}.  
-**vector()** :: [{id(), counter(), values()}].  
+**vector()** :: [{counter(), values()}].  
 **entries()** :: [{id()}, {counter(), [values()]}].  
 **id()** :: string().  
 **values()** :: [value()].  
 **value()** :: string().  
-**counter()** :: non_neg_integer().
+**counter()** :: non_neg_integer().  
 
 ### Structure of clocks
 
@@ -40,7 +40,7 @@ Advances the causal history of the first clock with the given id, while synchron
 
 Examples:  
 ***Update([{a,1,[]}],["v2"]**(first clock)*,***[{a,1,["v1"]}],[]**(second clock)*,***"a"(id)) -> [{a,2,[v2]}],[]***  
-***Update([{a,1,[]}],["v4"]**(first clock)*,***[{a,2,[]}],[]**(second clock)*,***"b"(id)) -> [{a,2,[v2]}],[{b,1,[v4]}],[]***  
-***Update([{a,1,[]}],["v5"]**(first clock)*,***[{a,2,[]}],[]**(second clock)*,***"a"(id)) -> [{a,3,[v5][v2]}],[]***  
+***Update([{a,1,[]}],["v4"]**(first clock)*,***[{a,2,[]}],["v2"]**(second clock)*,***"b"(id)) -> [{a,2,[v2]}],[{b,1,[v4]}],[]***  
+***Update([{a,1,[]}],["v5"]**(first clock)*,***[{a,2,[]}],[v2]**(second clock)*,***"a"(id)) -> [{a,3,[v5][v2]}],[]***  
 
 ### SyncClocks(Clock clock1, Clock clock2)

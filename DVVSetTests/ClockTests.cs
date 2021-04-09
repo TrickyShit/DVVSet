@@ -11,9 +11,9 @@ namespace DVVSetTests
         public void NewWithHistoryTest()
         {
             var a = new Clock("v1");
-            var a1 = Create(a, "a");
+            var a1 = Update(a, "a");
             var b = new Clock(Join(a1), "v2");
-            var b1 = Update(b, a1, "b");
+            var b1 = Update(b, "b", a1);
             Assert.AreEqual(ClockToString(a), "[],[v1];");
             Assert.AreEqual(ClockToString(a1), "[{a,1,[v1]}],[];");
             Assert.AreEqual(ClockToString(b), "[{a,1,[]}],[v2];");
@@ -23,11 +23,11 @@ namespace DVVSetTests
         [TestMethod()]
         public void UpdateTest()
         {
-            var a0 = Create(new Clock("v1"), "a");
-            var a1 = Update(new Clock(Join(a0), "v2"), a0, "a");
-            var a2 = Update(new Clock(Join(a1), "v3"), a1, "b");
-            var a3 = Update(new Clock(Join(a0), "v4"), a1, "b");
-            var a4 = Update(new Clock(Join(a0), "v5"), a1, "a");
+            var a0 = Update(new Clock("v1"), "a");
+            var a1 = Update(new Clock(Join(a0), "v2"), "a", a0);
+            var a2 = Update(new Clock(Join(a1), "v3"), "b", a1);
+            var a3 = Update(new Clock(Join(a0), "v4"), "b", a1);
+            var a4 = Update(new Clock(Join(a0), "v5"), "a", a1);
             Assert.AreEqual(ClockToString(a0), "[{a,1,[v1]}],[];");
             Assert.AreEqual(ClockToString(a1), "[{a,2,[v2]}],[];");
             Assert.AreEqual(ClockToString(a2), "[{a,2,[]}],[{b,1,[v3]}],[];");
@@ -39,15 +39,15 @@ namespace DVVSetTests
         public void SyncTest()
         {
             var temp = new Clock();
-            var x = Create(temp, "x");              //{[{x,1,[]}],[] as Erlang
-            var a = Create(new Clock("v1"), "a");   //{[{a,1,[v1]}],[]
-            var y = Create(new Clock("v2"), "b");   
-            var a1 = Create(new Clock(Join(a), "v2"), "a");
-            var a3 = Create(new Clock(Join(a1), "v3"), "b");
-            var a4 = Create(new Clock(Join(a1), "v3"), "c");
+            var x = Update(temp, "x");              //{[{x,1,[]}],[] as Erlang
+            var a = Update(new Clock("v1"), "a");   //{[{a,1,[v1]}],[]
+            var y = Update(new Clock("v2"), "b");
+            var a1 = Update(new Clock(Join(a), "v2"), "a");
+            var a3 = Update(new Clock(Join(a1), "v3"), "b");
+            var a4 = Update(new Clock(Join(a1), "v3"), "c");
             //F   = fun (L,R) -> L>R end;
-            var w = Create(temp, "a");           //W = {[{a,1,[]}],[]}
-            var z = Create(temp, "a");           //z = {[{a,2,[v2][v1]}],[]};
+            var w = Update(temp, "a");           //W = {[{a,1,[]}],[]}
+            var z = Update(temp, "a");           //z = {[{a,2,[v2][v1]}],[]};
             z.Entries.Values[0].Counter = 2;
             z.Entries.Values[0].Values.Add("v2");
             z.Entries.Values[0].Values.Add("v1");
@@ -68,10 +68,10 @@ namespace DVVSetTests
         [TestMethod()]
         public void SyncupdateTest()
         {
-            var a0 = Create(new Clock(new List<string>{"v1"}), "a");            // Mary writes v1 w / o VV
+            var a0 = Update(new Clock(new List<string> { "v1" }), "a");            // Mary writes v1 w / o VV
             var vv1 = Join(a0);                                                 // Peter reads v1 with version vector(VV)
-            var a1 = Update(new Clock(new List<string> {"v2"}), a0, "a");       // Mary writes v2 w / o VV
-            var a2 = Update(new Clock(vv1,new List<string> {"v3"}), a1, "a");   // Peter writes v3 with VV from v1
+            var a1 = Update(new Clock(new List<string> { "v2" }), "a", a0);       // Mary writes v2 w / o VV
+            var a2 = Update(new Clock(vv1, new List<string> { "v3" }), "a" ,a1);   // Peter writes v3 with VV from v1
             Assert.AreEqual(ClockToString(vv1), "[{a,1,[]}],[];");
             Assert.AreEqual(ClockToString(a0), "[{a,1,[v1]}],[];");
             Assert.AreEqual(ClockToString(a1), "[{a,2,[v2][v1]}],[];");
