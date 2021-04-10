@@ -71,12 +71,44 @@ namespace DVVSetTests
             var a0 = Update(new Clock(new List<string> { "v1" }), "a");            // Mary writes v1 w / o VV
             var vv1 = Join(a0);                                                 // Peter reads v1 with version vector(VV)
             var a1 = Update(new Clock(new List<string> { "v2" }), "a", a0);       // Mary writes v2 w / o VV
-            var a2 = Update(new Clock(vv1, new List<string> { "v3" }), "a" ,a1);   // Peter writes v3 with VV from v1
+            var a2 = Update(new Clock(vv1, new List<string> { "v3" }), "a", a1);   // Peter writes v3 with VV from v1
             Assert.AreEqual(ClockToString(vv1), "[{a,1,[]}],[];");
             Assert.AreEqual(ClockToString(a0), "[{a,1,[v1]}],[];");
             Assert.AreEqual(ClockToString(a1), "[{a,2,[v2][v1]}],[];");
             // now A2 should only have v2 and v3, since v3 was causally newer than v1
             Assert.AreEqual(ClockToString(a2), "[{a,3,[v3][v2]}],[];");
+        }
+
+        [TestMethod()]
+        public void EventTest()
+        {
+            var a = Update(new Clock("v1"), "a");
+            Assert.AreEqual(ClockToString(Entry(a, "a", "v2")), "[{a,2,[v2][v1]}],[];");
+            Assert.AreEqual(ClockToString(Entry(a, "b", "v2")), "[{a,1,[v1]}],[{b,1,[v2]}],[];");
+        }
+
+        [TestMethod()]
+        public void LessTest()
+        {
+            var a = Update(new Clock("v1"), "a");
+            var b = Update(new Clock(Join(a), "v2"), "a");
+            var b2 = Update(new Clock(Join(a), "v2"), "b");
+            var b3 = Update(new Clock(Join(a), "v2"), "z");
+            var c = Update(new Clock(Join(b), "v3"), "c", a);
+            var d = Update(new Clock(Join(c), "v4"), "d", b2);
+            Assert.IsTrue(Less(a,b));
+            Assert.IsTrue(Less(a,c));
+            Assert.IsTrue(Less(b,c));
+            Assert.IsTrue(Less(b,d));
+            Assert.IsTrue(Less(b2,d));
+            Assert.IsTrue(Less(a,d));
+            Assert.IsFalse(Less(b2,c));
+            Assert.IsFalse(Less(b,b2));
+            Assert.IsFalse(Less(b2,b));
+            Assert.IsFalse(Less(a,a));
+            Assert.IsFalse(Less(c,c));
+            Assert.IsFalse(Less(d,b2));
+            Assert.IsFalse(Less(b3,d));
         }
     }
 }

@@ -21,7 +21,7 @@ namespace DVVSet
         protected static SortedList<string, Vector> Join(Clock clock)
         {
             var result = new SortedList<string, Vector>();
-            foreach ((string key, Vector value) in clock.Entries)result.Add(key, new Vector(value.Counter, new List<string>()));
+            foreach ((string key, Vector value) in clock.Entries) result.Add(key, new Vector(value.Counter, new List<string>()));
             return result;
         }
 
@@ -47,11 +47,12 @@ namespace DVVSet
         // We create a new event on the synced causal history,
         // with the id and the new value.
         // The anonymous values that were synced still remain.
-        private SortedList<string, Vector> Entry(Clock clock, string theId)
+        public SortedList<string, Vector> Entry(Clock clock, string theId, string value = null)
         {
             var vector = new SortedList<string, Vector>();
             foreach (var i in clock.Entries) vector.Add(i.Key, i.Value);
             var values = new List<string>();
+            if (value != null) values.Add(value);
             foreach (var i in clock.ClockValues) values.Add(i);
             var result = new SortedList<string, Vector>();
             if (vector.Count == 0)
@@ -64,7 +65,8 @@ namespace DVVSet
                 var mergeCounter = vector[theId].Counter;
                 var mergeValues = vector[theId].Values;
                 var mergeclock = Merge(theId, mergeCounter, mergeValues, mergeCounter, values);
-                return new SortedList<string, Vector> { { mergeclock.Key, mergeclock.Value } };
+                result.Add(mergeclock.Key, mergeclock.Value);
+                return result;
             }
             else
             {
@@ -136,8 +138,7 @@ namespace DVVSet
             var (entries2, values2) = clock2;
             var syncvalue = new List<string>();
             if (Less(clock2, clock1) && values1.Any()) syncvalue.Add(values1.First());
-            else
-            if (Less(clock1, clock2) && values2.Any()) syncvalue.Add(values2.First());
+            else if (Less(clock1, clock2) && values2.Any()) syncvalue.Add(values2.First());
             else
             {
                 if ((values1.Count > 0) && (values2.Count > 0))
@@ -188,7 +189,7 @@ namespace DVVSet
                     result.Add(head1.Key, head1.Value);
                     continue;
                 }
-                List<string> temp;
+                List<string> temp = new List<string>();
                 var headresult = new SortedList<string, Vector>();
                 KeyValuePair<string, Vector> mergepair;
                 switch (ComparePairs(head1, head2))
@@ -198,13 +199,13 @@ namespace DVVSet
                         result.Add(head1.Key, head1.Value);
                         break;
                     case counter1isbigger:
+                        if (head1.Value.Values.Count > 0) temp.Add(head1.Value.Values[0]);
+                        head1.Value.Values = temp;
                         headresult.Add(head1.Key, head1.Value);
-                        temp = new List<string> { headresult.Values[0].Values[0] };
-                        headresult.Values[0].Values = temp;
                         break;
                     case counter1islesser:
                         headresult.Add(head2.Key, head2.Value);
-                        temp = new List<string> { headresult.Values[0].Values[0] };
+                        if (headresult.Values[0].Values[0].Any()) temp.Add(headresult.Values[0].Values[0]);
                         headresult.Values[0].Values = temp;
                         break;
                     case values1more:
@@ -215,6 +216,8 @@ namespace DVVSet
                         }
                         else
                             if (head1.Value.Values.Count > 0) headresult.Values[0].Values.Add(head1.Value.Values[0]);
+                            else headresult.Add(head1.Key, head1.Value);
+
                         break;
                     case values1fewer:
                         if (head2.Value.Values.Count > 0 && head1.Value.Values.Count > 0)
@@ -222,7 +225,7 @@ namespace DVVSet
                             mergepair = Merge(head2.Key, head2.Value.Counter, head2.Value.Values, head1.Value.Counter, head1.Value.Values);
                             headresult.Add(mergepair.Key, mergepair.Value);
                         }
-                        else headresult.Add(head1.Key, head1.Value);
+                        else headresult.Add(head2.Key, head2.Value);
                         break;
                     default:
                         if (!head1.Value.Values.Equals(head2.Value.Values) && head1.Value.Values.Count > 0)
@@ -246,9 +249,9 @@ namespace DVVSet
             if (!pair1.Key.Equals(pair2.Key)) return differentkeys;
             if (pair1.Value.Counter > pair2.Value.Counter) return counter1isbigger;
             if (pair1.Value.Counter < pair2.Value.Counter) return counter1islesser;
-            if (pair1.Value.Values == null && pair2.Value.Values == null) return 0;
-            if (pair1.Value.Values == null) return values1fewer;
-            if (pair2.Value.Values == null) return values1more;
+            if (pair1.Value.Values.Count == 0 && pair2.Value.Values.Count == 0) return 0;
+            if (pair1.Value.Values.Count == 0) return values1more;
+            if (pair2.Value.Values.Count == 0) return values1fewer;
             if (pair1.Value.Values.Count > pair2.Value.Values.Count) return values1more;
             if (pair2.Value.Values.Count > pair1.Value.Values.Count) return values1fewer;
             return 0;
@@ -258,39 +261,55 @@ namespace DVVSet
         * the second clock, thus values on the first clock are outdated.
         * Returns False otherwise.*/
 
-        public static bool Less(Clock clock1, Clock clock2) => Greater(clock2.Entries, clock1.Entries, false);
+        public static bool Less(Clock clock1, Clock clock2) => Greater(clock2.Entries, clock1.Entries);
 
-        private static bool Greater(SortedList<string, Vector> vector1, SortedList<string, Vector> vector2, bool isStrict)
+        private static bool Greater(SortedList<string, Vector> vector1, SortedList<string, Vector> vector2)
         {
             if (!vector1.Any() && !vector2.Any())
             {
-                return isStrict;
+                return false;
             }
             if (!vector2.Any()) return true;
             if (!vector1.Any()) return false;
-            int counter = 0;
-            foreach (var node1 in vector1)
+            //if (vector1.Count > vector2.Count) return true;
+            //if (vector2.Count > vector1.Count) return false;
+            bool isStrict = false;
+            int count = vector1.Count<vector2.Count ? vector1.Count : vector2.Count;
+            bool vector1isbigger = vector1.Count>vector2.Count;
+            var node1=vector1.ToArray()[count-1];
+            var node2=vector2.ToArray()[count-1];
+            if (!node1.Key.Equals(node2.Key)) return false;
+            switch (ComparePairs(node1, node2))
             {
-                var node2 = vector2.ToArray()[counter];
-                try
-                {
-                }
-                catch (Exception)
-                {
-                    return true;
-                }
-                var value1 = node1.Key;
-                var value2 = node2.Key;
-                if (!value1.Equals(value2)) continue;
-                var dotNum1 = node1.Value.Counter;
-                var dotNum2 = node2.Value.Counter;
-                if (dotNum1 > dotNum2) return true;
-                if (dotNum1 < dotNum2) return false;
-                if (string.Compare(value2, value1, StringComparison.Ordinal) > 0) continue;
-                if (vector1.Count > counter) return true;
-                if (vector2.Count > counter) return false;
+                case counter1isbigger:
+                case values1more:
+                    if(vector1isbigger) return true;
+                    isStrict = true;
+                    break;
+                case counter1islesser:
+                case values1fewer:
+                    if(vector1.Count < vector2.Count) return false;
+                    isStrict = false;
+                    break;
+
+                default:
+                    if(vector1isbigger)return true;
+                    //if(isStrict&vector1isbigger)return true;
+                    //if(!isStrict&!vector1isbigger)return false;
+                    break;
             }
-            return false;
+            KeyValuePair<string, Vector> node;
+            if (vector1isbigger)
+            {
+                node = vector1.ToArray()[count];
+                if (!node.Key.Equals(node2.Key)) return false;
+            }
+            else if (vector1.Count < vector2.Count)
+            {
+                node = vector2.ToArray()[count];
+                if (!node.Key.Equals(node1.Key)) return false;
+            }
+            return isStrict;
         }
 
         //Returns the total number of values in this clock set.
