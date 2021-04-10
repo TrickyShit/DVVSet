@@ -100,7 +100,7 @@ namespace DVVSet
             if (values2.Count == 0) values.Add(values1[0]);
             else
             {
-                comparison = String.Compare(values1[0], values2[0], comparisonType: StringComparison.OrdinalIgnoreCase);
+                comparison = String.Compare(values1[0], values2[0], comparisonType: StringComparison.Ordinal);
                 if (comparison > 0)
                 {
                     values.Add(values1[0]);
@@ -216,7 +216,7 @@ namespace DVVSet
                         }
                         else
                             if (head1.Value.Values.Count > 0) headresult.Values[0].Values.Add(head1.Value.Values[0]);
-                            else headresult.Add(head1.Key, head1.Value);
+                        else headresult.Add(head1.Key, head1.Value);
 
                         break;
                     case values1fewer:
@@ -274,26 +274,26 @@ namespace DVVSet
             //if (vector1.Count > vector2.Count) return true;
             //if (vector2.Count > vector1.Count) return false;
             bool isStrict = false;
-            int count = vector1.Count<vector2.Count ? vector1.Count : vector2.Count;
-            bool vector1isbigger = vector1.Count>vector2.Count;
-            var node1=vector1.ToArray()[count-1];
-            var node2=vector2.ToArray()[count-1];
+            int count = vector1.Count < vector2.Count ? vector1.Count : vector2.Count;
+            bool vector1isbigger = vector1.Count > vector2.Count;
+            var node1 = vector1.ToArray()[count - 1];
+            var node2 = vector2.ToArray()[count - 1];
             if (!node1.Key.Equals(node2.Key)) return false;
             switch (ComparePairs(node1, node2))
             {
                 case counter1isbigger:
                 case values1more:
-                    if(vector1isbigger) return true;
+                    if (vector1isbigger) return true;
                     isStrict = true;
                     break;
                 case counter1islesser:
                 case values1fewer:
-                    if(vector1.Count < vector2.Count) return false;
+                    if (vector1.Count < vector2.Count) return false;
                     isStrict = false;
                     break;
 
                 default:
-                    if(vector1isbigger)return true;
+                    if (vector1isbigger) return true;
                     //if(isStrict&vector1isbigger)return true;
                     //if(!isStrict&!vector1isbigger)return false;
                     break;
@@ -315,7 +315,8 @@ namespace DVVSet
         //Returns the total number of values in this clock set.
         public static int Size(Clock clock)
         {
-            var result = clock.Entries.Values.Count(i => i.Values.Any());
+            int result = 0;
+            foreach(var i in clock.Entries)result += i.Value.Values.Count;
             result += clock.ClockValues.Count;
             return result;
         }
@@ -329,8 +330,7 @@ namespace DVVSet
         public static List<string> ListValues(Clock clock)
         {
             var result = new List<string>();
-            var entries = clock.Entries;
-            foreach (var i in entries)
+            foreach (var i in clock.Entries)
             {
                 result.AddRange(i.Value.Values);
             }
@@ -346,22 +346,15 @@ namespace DVVSet
 
         private static bool Equal(SortedList<string, Vector> vector1, SortedList<string, Vector> vector2)
         {
-            if (vector1.Any() && vector2.Any()) return true;
-            var (key1, (counter1, list1)) = vector1.First();
-            var (key2, (counter2, list2)) = vector2.First();
-            if (counter1 == 0 || counter2 == 0) return false;
-            if (!key1.Equals(key2)) return false;
-
-            if (list1.Count == list2.Count)
+            if (vector1.Count != vector2.Count) return false;
+            for (int i = 0; i < vector2.Count; i++)
             {
-                var subList1 = vector1;
-                subList1.Remove(subList1.First().Key);
-                var subList2 = vector2;
-                subList2.Remove(subList2.First().Key);
-
-                return Equal(subList1, subList2);
+                var node1 = vector1.ToArray()[i];
+                var node2 = vector2.ToArray()[i];
+                if (node1.Value.Counter != node2.Value.Counter) return false;
+                if (!node1.Key.Equals(node2.Key)) return false;
             }
-            return false;
+            return true;
         }
     }
 }

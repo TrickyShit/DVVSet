@@ -96,19 +96,69 @@ namespace DVVSetTests
             var b3 = Update(new Clock(Join(a), "v2"), "z");
             var c = Update(new Clock(Join(b), "v3"), "c", a);
             var d = Update(new Clock(Join(c), "v4"), "d", b2);
-            Assert.IsTrue(Less(a,b));
-            Assert.IsTrue(Less(a,c));
-            Assert.IsTrue(Less(b,c));
-            Assert.IsTrue(Less(b,d));
-            Assert.IsTrue(Less(b2,d));
-            Assert.IsTrue(Less(a,d));
-            Assert.IsFalse(Less(b2,c));
-            Assert.IsFalse(Less(b,b2));
-            Assert.IsFalse(Less(b2,b));
-            Assert.IsFalse(Less(a,a));
-            Assert.IsFalse(Less(c,c));
-            Assert.IsFalse(Less(d,b2));
-            Assert.IsFalse(Less(b3,d));
+            Assert.IsTrue(Less(a, b));
+            Assert.IsTrue(Less(a, c));
+            Assert.IsTrue(Less(b, c));
+            Assert.IsTrue(Less(b, d));
+            Assert.IsTrue(Less(b2, d));
+            Assert.IsTrue(Less(a, d));
+            Assert.IsFalse(Less(b2, c));
+            Assert.IsFalse(Less(b, b2));
+            Assert.IsFalse(Less(b2, b));
+            Assert.IsFalse(Less(a, a));
+            Assert.IsFalse(Less(c, c));
+            Assert.IsFalse(Less(d, b2));
+            Assert.IsFalse(Less(b3, d));
+        }
+
+        [TestMethod()]
+        public void EqualTest()
+        {
+            Clock a = new Clock();            //[{a,4,[v5][v0]}],[{b,0,[]}],[{c,1,[v3]}],[v0]
+            var a1 = new KeyValuePair<string, Vector>("a", new Vector(4, new List<string> { "v5", "v0" }));
+            var a2 = new KeyValuePair<string, Vector>("b", new Vector(0, new List<string>()));
+            var a3 = new KeyValuePair<string, Vector>("c", new Vector(1, new List<string> { "v3" }));
+            a.Entries.Add(a1.Key, a1.Value);
+            a.Entries.Add(a2.Key, a2.Value);
+            a.Entries.Add(a3.Key, a3.Value);
+            a.ClockValues.Add("v0");
+
+            Clock b = new Clock();              //[{a,4,[v555,v0]}],[{b,0,[]}],[{c,1,[v3]}],[];
+            var b1 = new KeyValuePair<string, Vector>("a", new Vector(4, new List<string> { "v555", "v0" }));
+            var b2 = new KeyValuePair<string, Vector>("b", new Vector(0, new List<string>()));
+            var b3 = new KeyValuePair<string, Vector>("c", new Vector(1, new List<string> { "v3" }));
+            b.Entries.Add(b1.Key, b1.Value);
+            b.Entries.Add(b2.Key, b2.Value);
+            b.Entries.Add(b3.Key, b3.Value);
+
+            Clock c = new Clock();              //[{a,4,[v5,v0]}],[{b,0,[]}],[v6,v1];
+            var c1 = new KeyValuePair<string, Vector>("a", new Vector(4, new List<string> { "v5", "v0" }));
+            var c2 = new KeyValuePair<string, Vector>("b", new Vector(0, new List<string>()));
+            c.Entries.Add(c1.Key, c1.Value);
+            c.Entries.Add(c2.Key, c2.Value);
+            c.ClockValues.Add("v6");
+            c.ClockValues.Add("v1");
+            // compare only the causal history
+            Assert.IsTrue(Equal(a, b));
+            Assert.IsTrue(Equal(b, a));
+            Assert.IsFalse(Equal(a, c));
+            Assert.IsFalse(Equal(b, c));
+        }
+
+        [TestMethod()]
+        public void SizeTest()
+        {
+            Clock a = new Clock();            //[{a,4,[v5][v0]}],[{b,0,[]}],[{c,1,[v3]}],[v4][v1]
+            var a1 = new KeyValuePair<string, Vector>("a", new Vector(4, new List<string> { "v5", "v0" }));
+            var a2 = new KeyValuePair<string, Vector>("b", new Vector(0, new List<string>()));
+            var a3 = new KeyValuePair<string, Vector>("c", new Vector(1, new List<string> { "v3" }));
+            a.Entries.Add(a1.Key, a1.Value);
+            a.Entries.Add(a2.Key, a2.Value);
+            a.Entries.Add(a3.Key, a3.Value);
+            a.ClockValues.Add("v4");
+            a.ClockValues.Add("v1");
+            Assert.AreEqual(1, Size(new Clock("v1")));
+            Assert.AreEqual(5, Size(a));
         }
     }
 }
