@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DVVSet
+namespace LUC.DVVSet
 {
     public class Dvvdotnet : Clock
     {
@@ -18,10 +18,10 @@ namespace DVVSet
 
         //* Return a version vector that represents the causal history.
 
-        protected static SortedList<string, Vector> Join(Clock clock)
+        public static SortedList<string, Vector> Join(Clock clock)
         {
             var result = new SortedList<string, Vector>();
-            foreach ((string key, Vector value) in clock.Entries) result.Add(key, new Vector(value.Counter, new List<string>()));
+            foreach (var keyvalue in clock.Entries) result.Add(keyvalue.Key, new Vector(keyvalue.Value.Counter, new List<string>()));
             return result;
         }
 
@@ -31,7 +31,7 @@ namespace DVVSet
         * The first clock SHOULD BE a direct result of new/2, which is intended to be the client clock with
         * the new value in the *anonymous dot* while the second clock is from the local server.*/
 
-        protected Clock Update(Clock clock1, string theId, Clock clock2 = null)
+        public Clock Update(Clock clock1, string theId, Clock clock2 = null)
         {
             // Sync both clocks without the new value
             var c1 = new Clock
@@ -85,8 +85,8 @@ namespace DVVSet
             var eventValue = new SortedList<string, Vector>(vector);
             eventValue.RemoveAt(0);
             var eventV = Entry(new Clock(eventValue, values), theId);
-            foreach (var (key, vector1) in eventV)
-                result.Add(key, vector1);
+            foreach (var keyvalue in eventV)
+                result.Add(keyvalue.Key, keyvalue.Value);
             return result;
         }
 
@@ -158,7 +158,7 @@ namespace DVVSet
 
         public static SortedList<string, Vector> SyncEntries(SortedList<string, Vector> entry1, SortedList<string, Vector> entry2)
         {
-            static KeyValuePair<string, Vector> KeyValue(SortedList<string, Vector> entry)
+            KeyValuePair<string, Vector> KeyValue(SortedList<string, Vector> entry)
             {
                 var temp = entry.First();
                 Vector newValue = new Vector(temp.Value.Counter, temp.Value.Values);

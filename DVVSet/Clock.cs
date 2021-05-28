@@ -4,11 +4,11 @@
 // order information.
 // 
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
-namespace DVVSet
+namespace LUC.DVVSet
 {
     public class Clock //{entries(), values()}
     {
@@ -58,15 +58,18 @@ namespace DVVSet
             values = ClockValues;
         }
 
-        protected static string ClockToString(object clocks)
+        public string ClockToString(object clocks, bool tests = false)
         {
             var result = "";
+            var spacer = "";
+            if (!tests) spacer = "\"";
             var clock = new Clock();
-            if (clocks.GetType()==typeof(SortedList<string, Vector>))
-            {
+            if (tests)
+                if (clocks.GetType() == typeof(SortedList<string, Vector>))
+                {
                     clock.Entries = clocks as SortedList<string, Vector>;
                     clock.ClockValues = new List<string>();
-            }
+                }
             if (clocks.GetType() == typeof(Clock))
             {
                 clock = clocks as Clock;
@@ -74,20 +77,73 @@ namespace DVVSet
             if (clock.Entries.Count > 0)
             {
                 int count = 0;
-                foreach (var (key, (counter, value)) in clock.Entries)
+                foreach (var keyvalue in clock.Entries)
                 {
-                    result += "[{" + key + "," + counter + ",";
-                    if (value.Count == 0) result += "[]";
-                    else result = value.Aggregate(result, (current, i) => current + "[" + i + "]");
-                    result += "}],";
-                    //if (clock.ClockValues.Any()) result += "[" + clock.ClockValues[count] + "];";
-                    //else result+="[];";
-                    count++;
+                    if (tests) result += "[{";
+                    else result += "[[[";
+                    result += $"{spacer}{keyvalue.Key}{spacer},{keyvalue.Value.Counter},";
+                    if (keyvalue.Value.Values.Count == 0) result += "[]";
+                    else result = keyvalue.Value.Values.Aggregate(result, (current, i) => $"{current}[{spacer}{i}{spacer}]");
+                    if (tests) result += "}],";
+                    else result += "]],";
+                   //if (clock.ClockValues.Any()) result += "[" + clock.ClockValues[count] + "];";
+                   //else result+="[];";
+                   count++;
                 }
             }
             else result += "[],";
-            if (clock.ClockValues.Any()) return result + "[" + clock.ClockValues.Aggregate((current, i) => current + "[" + i + "]") + "];";
-            else return result + "[];";
+            if (clock.ClockValues.Any()) result += "[" + spacer+clock.ClockValues.Aggregate((current, i) => current + "[" + i + "]") + "]";
+            else result += "[]";
+            if (tests) result += ";";
+            else result += "]";
+            return result;
         }
+
+        public List<object> ClockToList(object clocks)
+        {
+            var result = new List<object>();
+            var clock = new Clock();
+            if (clocks.GetType() == typeof(SortedList<string, Vector>))
+            {
+                clock.Entries = clocks as SortedList<string, Vector>;
+                clock.ClockValues = new List<string>();
+            }
+            if (clocks.GetType() == typeof(Clock))
+            {
+                clock = clocks as Clock;
+            }
+            if (clock.Entries.Count > 0)
+            {
+                ClockToList listvalue = new ClockToList();
+                foreach (var keyvalue in clock.Entries)
+                {
+                    listvalue.Key = keyvalue.Key;
+                    listvalue.Counter = keyvalue.Value.Counter;
+                    listvalue.Values = keyvalue.Value.Values;
+                    result.Add(listvalue);
+                    if (keyvalue.Value.Values.Count == 0) result.Add(new List<string>());
+                    else result.Add(keyvalue.Value.Values);
+                }
+            }
+            if (clock.ClockValues.Any()) result.Add(clock.ClockValues);
+            return result;
+        }
+
+    }
+
+    public class ClockToList
+    {
+        public string Key { get; set; }
+        public int Counter { get; set; }
+        public List<string> Values { get; set; }
+
+        public ClockToList(string key, int counter, List<string> values)
+        {
+            Key = key;
+            Counter = counter;
+            Values = values;
+        }
+
+        public ClockToList() { }
     }
 }

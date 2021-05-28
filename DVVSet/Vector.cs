@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace DVVSet
+namespace LUC.DVVSet
 {
     public class Vector //[{id(), counter()}, {values()}}].
     {
