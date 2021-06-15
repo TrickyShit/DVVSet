@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net471</TargetFramework>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AssemblyName>LUC.DVVSet</AssemblyName>
+    <RootNamespace>LUC.DVVSet</RootNamespace>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Company>lightuponcloud</Company>
+    <Description>We are presenting the compact version of the original Dotted Version Vectors(DVV), which we call Dotted Version Vector Sets (DVVSet). Like its predecessor, DVVSet still accurately describes causality between related or conflicting values (values that reflect concurrent updates and that must be all kept until a future reconciliation supersedes them), but now with a smaller representation, very similar to Version Vectors in size.
+
+Lets assume the scenario of a Distributed Key-Value Store (Ex: Riak, Cassandra, etc), where we have clients, servers and we can write ( PUT ) and read ( GET ) values. We also want to track the causality information of these values, so that causally descendant values replace older values and causally concurrent values are all kept (for further reconciliation).
+
+We can use DVVSet to keep the values and their causal history together, with support for multiple conflicting values (siblings). One DVVSet has 1 value (a single sibling) if there are no conflicts. Otherwise, it stores all siblings and their relevant causal information in a single DVVSet. Thus, this data structure encapsulates the tracking, maintaining and reasoning about the values' causality.</Description>
+    <PackageProjectUrl />
+    <RepositoryUrl>https://github.com/TrickyShit/DVVSet</RepositoryUrl>
+    <Copyright>Copyright (c) 2021</Copyright>
+    <NeutralLanguage>en</NeutralLanguage>
+    <Configurations>Debug;Release</Configurations>
+    <Platforms>AnyCPU</Platforms>
+    <UserSecretsId>f4f95791-756f-40ac-8da5-4a77026e5226</UserSecretsId>
+    <AssemblyVersion>1.0.0.1</AssemblyVersion>
+    <FileVersion>1.0.0.1</FileVersion>
+    <Version>1.0.0.1</Version>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn />
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <NoWarn />
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+</Project>

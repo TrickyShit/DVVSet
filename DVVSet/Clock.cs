@@ -4,9 +4,12 @@
 // order information.
 // 
 
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace LUC.DVVSet
 {
@@ -58,7 +61,7 @@ namespace LUC.DVVSet
             values = ClockValues;
         }
 
-        public string ClockToString(object clocks, bool tests = false)
+        public static string ClockToString(object clocks, bool tests = false)
         {
             var result = "";
             var spacer = "";
@@ -99,7 +102,7 @@ namespace LUC.DVVSet
             return result;
         }
 
-        public List<object> ClockToList(object clocks)
+        public static List<object> ClockToList(object clocks)
         {
             var result = new List<object>();
             var clock = new Clock();
@@ -129,6 +132,47 @@ namespace LUC.DVVSet
             return result;
         }
 
+        public static Clock StringToClock(string version)
+        {
+            var jsonarray = Encoding.UTF8.GetString(Convert.FromBase64String(version));
+            var objectList = JsonConvert.DeserializeObject<IList>(jsonarray);
+            Clock incomeClock = new Clock();
+            var incomeEntries = incomeClock.Entries;
+
+            foreach (var objectEntries in (IList)objectList[0])
+            {
+                var entriesList = objectEntries as IList;
+                Vector incomeVector = new Vector
+                {
+                    Counter = Convert.ToInt32(entriesList[1]),
+                    Values = new List<string>()
+                };
+
+                if (entriesList.Count == 3)
+                {
+                    var values = (IList)entriesList[2];
+                    foreach (var objectValues in values)
+                    {
+                        var value = objectValues.ToString();
+                        incomeVector.Values.Add(value);
+                    }
+                }
+                incomeEntries.Add(entriesList[0].ToString(), incomeVector);
+            }
+
+            if (objectList.Count == 1) incomeClock.ClockValues = new List<string>();
+            else
+            {
+                var clockValues = new List<string>();
+                var values = (IList)objectList[1];
+                foreach (var objectValues in values)
+                {
+                    clockValues.Add(objectValues.ToString());
+                }
+                incomeClock.ClockValues = clockValues;
+            }
+            return incomeClock;
+        }
     }
 
     public class ClockToList
