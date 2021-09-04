@@ -8,53 +8,68 @@ using System.Linq;
 
 namespace LUC.DVVSet
 {
+    /// <summary>
+    /// Methods for work with DVVSet
+    /// </summary>
     public class Dvvdotnet : Clock
     {
-        const int differentkeys = -100;
-        const int counter1isbigger = 1;
-        const int counter1islesser = -1;
-        const int values1more = 10;
-        const int values1fewer = -10;
+        const Int32 DifferentKeys = -100;
+        const Int32 Counter1isBigger = 1;
+        const Int32 Counter1islesser = -1;
+        const Int32 Values1more = 10;
+        const Int32 Values1fewer = -10;
 
-        //* Return a version vector that represents the causal history.
-
-        public static SortedList<string, Vector> Join(Clock clock)
+        //* 
+        /// <summary>
+        /// Return a version vector that represents the causal history.
+        /// </summary>
+        /// <param name="clock"></param>
+        /// <returns></returns>
+        public static SortedList<String, Vector> Join(Clock clock)
         {
-            var result = new SortedList<string, Vector>();
-            foreach (var keyvalue in clock.Entries) result.Add(keyvalue.Key, new Vector(keyvalue.Value.Counter, new List<string>()));
+            var result = new SortedList<String, Vector>();
+            foreach (var keyvalue in clock.Entries) result.Add(keyvalue.Key, new Vector(keyvalue.Value.Counter, new List<String>()));
             return result;
         }
 
-        /* Advances the causal history of the first clock with the given id, while synchronizing
-        * with the second clock, thus the new clock is causally newer than both clocks in the argument.
-        * The new value is the *anonymous dot* of the clock.
-        * The first clock SHOULD BE a direct result of new/2, which is intended to be the client clock with
-        * the new value in the *anonymous dot* while the second clock is from the local server.*/
-
-        public Clock Update(Clock clock1, string theId, Clock clock2 = null)
+        /// <summary>
+        /// Advances the causal history of the first clock with the given id, while synchronizing
+        /// with the second clock, thus the new clock is causally newer than both clocks in the argument.
+        /// </summary>
+        /// <param name="clock1">First clock. SHOULD BE a direct result of new/2, which is intended to be the client clock 
+        /// with the new value in the* anonymous dot*</param>
+        /// <param name="theId">Given id</param>
+        /// <param name="clock2">Second clock from the local server.</param>
+        /// <returns>New value is the *anonymous dot* of the clock.</returns>
+        public static Clock Update(Clock clock1, String theId, Clock clock2 = null)
         {
             // Sync both clocks without the new value
             var c1 = new Clock
             {
                 Entries = Entry(clock1, theId),
-                ClockValues = new List<string>()
+                ClockValues = new List<String>()
             };
             if (clock2 == null) return c1;
             var (entries, _) = SyncClocks(c1, clock2);
-            return new Clock(entries, new List<string>());
+            return new Clock(entries, new List<String>());
         }
 
-        // We create a new event on the synced causal history,
-        // with the id and the new value.
-        // The anonymous values that were synced still remain.
-        public SortedList<string, Vector> Entry(Clock clock, string theId, string value = null)
+        /// <summary>
+        /// Created a new event on the synced causal history, with the id and the new value.
+        /// The anonymous values that were synced still remain.
+        /// </summary>
+        /// <param name="clock"></param>
+        /// <param name="theId"></param>
+        /// <param name="value">Optional string value, if needed</param>
+        /// <returns></returns>
+        public static SortedList<String, Vector> Entry(Clock clock, String theId, String value = null)
         {
-            var vector = new SortedList<string, Vector>();
+            var vector = new SortedList<String, Vector>();
             foreach (var i in clock.Entries) vector.Add(i.Key, i.Value);
-            var values = new List<string>();
+            var values = new List<String>();
             if (value != null) values.Add(value);
             foreach (var i in clock.ClockValues) values.Add(i);
-            var result = new SortedList<string, Vector>();
+            var result = new SortedList<String, Vector>();
             if (vector.Count == 0)
             {
                 result.Add(theId, new Vector(1, values));
@@ -71,7 +86,7 @@ namespace LUC.DVVSet
             else
             {
                 var vectorId = vector.Keys[0];
-                var i = string.Compare(vectorId, theId, StringComparison.Ordinal);
+                var i = String.Compare(vectorId, theId, StringComparison.Ordinal);
                 if (i > 0)
                 {
                     var newVector = new Vector { Counter = 1, Values = values };
@@ -82,7 +97,7 @@ namespace LUC.DVVSet
                 }
             }
             result.Add(vector.Keys[0], vector.Values[0]);
-            var eventValue = new SortedList<string, Vector>(vector);
+            var eventValue = new SortedList<String, Vector>(vector);
             eventValue.RemoveAt(0);
             var eventV = Entry(new Clock(eventValue, values), theId);
             foreach (var keyvalue in eventV)
@@ -90,31 +105,44 @@ namespace LUC.DVVSet
             return result;
         }
 
-        private static KeyValuePair<string, Vector> Merge(string id, int count1, List<string> values1, int count2, List<string> values2)
+        private static KeyValuePair<String, Vector> Merge(String id, Int32 count1, List<String> values1, Int32 count2, List<String> values2)
         {
-            List<string> values = new List<string>();
-            int count = count1 > count2 ? count1 + 1 : count2 + 1;
-            int comparison;
-            if (values1.Count == 0) values.Add(values2[0]);
-            else
-            if (values2.Count == 0) values.Add(values1[0]);
-            else
+            var values = new List<String>();
+            var count = count1 > count2 ? count1 + 1 : count2 + 1;
+            Int32 comparison;
+            switch (values1.Count)
             {
-                comparison = String.Compare(values1[0], values2[0], comparisonType: StringComparison.Ordinal);
-                if (comparison > 0)
+            case 0:
+                values.Add(values2[0]);
+                break;
+            default:
+                if (values2.Count == 0)
                 {
                     values.Add(values1[0]);
-                    values.Add(values2[0]);
                 }
-                else if (comparison < 0)
+                else
                 {
-                    values.Add(values2[0]);
-                    values.Add(values1[0]);
+                    comparison = String.Compare(values1[0], values2[0], comparisonType: StringComparison.Ordinal);
+                    if (comparison > 0)
+                    {
+                        values.Add(values1[0]);
+                        values.Add(values2[0]);
+                    }
+                    else if (comparison < 0)
+                    {
+                        values.Add(values2[0]);
+                        values.Add(values1[0]);
+                    }
+                    else
+                    {
+                        values.Add(values1[0]);
+                    }
                 }
-                else values.Add(values1[0]);
+
+                break;
             }
             var value = new Vector(count, values);
-            var result = new KeyValuePair<string, Vector>(id, value);
+            var result = new KeyValuePair<String, Vector>(id, value);
             return result;
         }
 
@@ -124,11 +152,12 @@ namespace LUC.DVVSet
         // by key and by index. So method foldl is don't needed.
         //_________________________________________________________________
 
-
-        //*******************************************************************************//
-        //* Synchronizes a list of clocks using Sync().                                 *// 
-        //* It discards (causally) outdated values, while merging all causal histories. *//
-
+        /// <summary>
+        /// Synchronizes a list of clocks. It discards (causally) outdated values, while merging all causal histories. 
+        /// </summary>
+        /// <param name="clock1"></param>
+        /// <param name="clock2"></param>
+        /// <returns>Synchronized Clock value</returns>
         public static Clock SyncClocks(Clock clock1, Clock clock2)
         {
             if (clock1 == null) return clock2;
@@ -136,9 +165,15 @@ namespace LUC.DVVSet
             var result = new Clock();
             var (entries1, values1) = clock1;
             var (entries2, values2) = clock2;
-            var syncvalue = new List<string>();
-            if (Less(clock2, clock1) && values1.Any()) syncvalue.Add(values1.First());
-            else if (Less(clock1, clock2) && values2.Any()) syncvalue.Add(values2.First());
+            var syncvalue = new List<String>();
+            if (Less(clock2, clock1) && values1.Any())
+            {
+                syncvalue.Add(values1.First());
+            }
+            else if (Less(clock1, clock2) && values2.Any())
+            {
+                syncvalue.Add(values2.First());
+            }
             else
             {
                 if ((values1.Count > 0) && (values2.Count > 0))
@@ -152,31 +187,32 @@ namespace LUC.DVVSet
                 }
             }
             result.ClockValues = syncvalue;
-            result.Entries = SyncEntries(new SortedList<string, Vector>(entries1), new SortedList<string, Vector>(entries2));
+            result.Entries = SyncEntries(new SortedList<String, Vector>(entries1), new SortedList<String, Vector>(entries2));
             return result;
         }
 
-        public static SortedList<string, Vector> SyncEntries(SortedList<string, Vector> entry1, SortedList<string, Vector> entry2)
+        private static SortedList<String, Vector> SyncEntries(SortedList<String, Vector> entry1, SortedList<String, Vector> entry2)
         {
-            KeyValuePair<string, Vector> KeyValue(SortedList<string, Vector> entry)
+            KeyValuePair<String, Vector> KeyValue(SortedList<String, Vector> entry)
             {
                 var temp = entry.First();
-                Vector newValue = new Vector(temp.Value.Counter, temp.Value.Values);
-                return new KeyValuePair<string, Vector>(temp.Key, newValue);
+                var newValue = new Vector(temp.Value.Counter, temp.Value.Values);
+                return new KeyValuePair<String, Vector>(temp.Key, newValue);
             }
 
             if (!entry1.Any()) return entry2;
             if (!entry2.Any()) return entry1;
-            var result = new SortedList<string, Vector>();
+
+            var result = new SortedList<String, Vector>();
             var count1 = entry1.Count;
             var count2 = entry2.Count;
-            int count = count1 > count2 ? count1 : count2;
-            KeyValuePair<string, Vector> head1;
-            KeyValuePair<string, Vector> head2;
-            for (int c = 0; c < count; c++)
+            var count = count1 > count2 ? count1 : count2;
+            KeyValuePair<String, Vector> head1;
+            KeyValuePair<String, Vector> head2;
+            for (var c = 0; c < count; c++)
             {
-                head1 = entry1.Count > 0 ? KeyValue(entry1) : new KeyValuePair<string, Vector>();
-                head2 = entry2.Count > 0 ? KeyValue(entry2) : new KeyValuePair<string, Vector>();
+                head1 = entry1.Count > 0 ? KeyValue(entry1) : new KeyValuePair<String, Vector>();
+                head2 = entry2.Count > 0 ? KeyValue(entry2) : new KeyValuePair<String, Vector>();
 
                 if (head1.Key == null)
                 {
@@ -189,52 +225,66 @@ namespace LUC.DVVSet
                     result.Add(head1.Key, head1.Value);
                     continue;
                 }
-                List<string> temp = new List<string>();
-                var headresult = new SortedList<string, Vector>();
-                KeyValuePair<string, Vector> mergepair;
+                var temp = new List<String>();
+                var headresult = new SortedList<String, Vector>();
+                KeyValuePair<String, Vector> mergepair;
                 switch (ComparePairs(head1, head2))
                 {
-                    case differentkeys:
+                    case DifferentKeys:
                         result.Add(head2.Key, head2.Value);
                         result.Add(head1.Key, head1.Value);
                         break;
-                    case counter1isbigger:
+                    case Counter1isBigger:
                         if (head1.Value.Values.Count > 0) temp.Add(head1.Value.Values[0]);
                         head1.Value.Values = temp;
                         headresult.Add(head1.Key, head1.Value);
                         break;
-                    case counter1islesser:
+                    case Counter1islesser:
                         headresult.Add(head2.Key, head2.Value);
                         if (headresult.Values[0].Values[0].Any()) temp.Add(headresult.Values[0].Values[0]);
                         headresult.Values[0].Values = temp;
                         break;
-                    case values1more:
+                    case Values1more:
                         if (head2.Value.Values.Count > 0 && head1.Value.Values.Count > 0)
                         {
                             mergepair = Merge(head2.Key, head2.Value.Counter, head2.Value.Values, head1.Value.Counter, head1.Value.Values);
                             headresult.Add(mergepair.Key, mergepair.Value);
                         }
                         else
-                            if (head1.Value.Values.Count > 0) headresult.Values[0].Values.Add(head1.Value.Values[0]);
-                        else headresult.Add(head1.Key, head1.Value);
+                            if (head1.Value.Values.Count > 0)
+                    {
+                        headresult.Values[0].Values.Add(head1.Value.Values[0]);
+                    }
+                    else
+                    {
+                        headresult.Add(head1.Key, head1.Value);
+                    }
 
-                        break;
-                    case values1fewer:
+                    break;
+                    case Values1fewer:
                         if (head2.Value.Values.Count > 0 && head1.Value.Values.Count > 0)
                         {
                             mergepair = Merge(head2.Key, head2.Value.Counter, head2.Value.Values, head1.Value.Counter, head1.Value.Values);
                             headresult.Add(mergepair.Key, mergepair.Value);
                         }
-                        else headresult.Add(head2.Key, head2.Value);
-                        break;
+                        else
+                    {
+                        headresult.Add(head2.Key, head2.Value);
+                    }
+
+                    break;
                     default:
                         if (!head1.Value.Values.Equals(head2.Value.Values) && head1.Value.Values.Count > 0)
                         {
                             mergepair = Merge(head1.Key, head1.Value.Counter, head1.Value.Values, head2.Value.Counter, head2.Value.Values);
                             result.Add(mergepair.Key, mergepair.Value);
                         }
-                        else result.Add(head1.Key, head1.Value);
-                        break;
+                        else
+                    {
+                        result.Add(head1.Key, head1.Value);
+                    }
+
+                    break;
                 }
                 if (headresult.Count > 0) result.Add(headresult.Keys[0], headresult.Values[0]);
                 if (entry2.Count > 0) entry2.RemoveAt(0);
@@ -243,27 +293,32 @@ namespace LUC.DVVSet
             return result;
         }
 
-
-        private static int ComparePairs(KeyValuePair<string, Vector> pair1, KeyValuePair<string, Vector> pair2)
+        private static Int32 ComparePairs(KeyValuePair<String, Vector> pair1, KeyValuePair<String, Vector> pair2)
         {
-            if (!pair1.Key.Equals(pair2.Key)) return differentkeys;
-            if (pair1.Value.Counter > pair2.Value.Counter) return counter1isbigger;
-            if (pair1.Value.Counter < pair2.Value.Counter) return counter1islesser;
+            if (!pair1.Key.Equals(pair2.Key)) return DifferentKeys;
+            if (pair1.Value.Counter > pair2.Value.Counter) return Counter1isBigger;
+            if (pair1.Value.Counter < pair2.Value.Counter) return Counter1islesser;
             if (pair1.Value.Values.Count == 0 && pair2.Value.Values.Count == 0) return 0;
-            if (pair1.Value.Values.Count == 0) return values1more;
-            if (pair2.Value.Values.Count == 0) return values1fewer;
-            if (pair1.Value.Values.Count > pair2.Value.Values.Count) return values1more;
-            if (pair2.Value.Values.Count > pair1.Value.Values.Count) return values1fewer;
+            if (pair1.Value.Values.Count == 0) return Values1more;
+            if (pair2.Value.Values.Count == 0) return Values1fewer;
+            if (pair1.Value.Values.Count > pair2.Value.Values.Count) return Values1more;
+            if (pair2.Value.Values.Count > pair1.Value.Values.Count) return Values1fewer;
             return 0;
         }
 
-        /* Returns True if the first clock is causally older than
-        * the second clock, thus values on the first clock are outdated.
-        * Returns False otherwise.*/
+        /// <summary>
+        /// Returns True if the first clock is causally older than the second clock, thus values on the first clock are outdated.
+        /// Returns False otherwise.
+        /// </summary>
+        /// <param name="clock1"></param>
+        /// <param name="clock2"></param>
+        /// <returns></returns>
+        public static Boolean Less(Clock clock1, Clock clock2)
+        {
+            return Greater(clock2.Entries, clock1.Entries);
+        }
 
-        public static bool Less(Clock clock1, Clock clock2) => Greater(clock2.Entries, clock1.Entries);
-
-        private static bool Greater(SortedList<string, Vector> vector1, SortedList<string, Vector> vector2)
+        private static Boolean Greater(SortedList<String, Vector> vector1, SortedList<String, Vector> vector2)
         {
             if (!vector1.Any() && !vector2.Any())
             {
@@ -273,21 +328,21 @@ namespace LUC.DVVSet
             if (!vector1.Any()) return false;
             //if (vector1.Count > vector2.Count) return true;
             //if (vector2.Count > vector1.Count) return false;
-            bool isStrict = false;
-            int count = vector1.Count < vector2.Count ? vector1.Count : vector2.Count;
-            bool vector1isbigger = vector1.Count > vector2.Count;
+            var isStrict = false;
+            var count = vector1.Count < vector2.Count ? vector1.Count : vector2.Count;
+            var vector1isbigger = vector1.Count > vector2.Count;
             var node1 = vector1.ToArray()[count - 1];
             var node2 = vector2.ToArray()[count - 1];
             if (!node1.Key.Equals(node2.Key)) return false;
             switch (ComparePairs(node1, node2))
             {
-                case counter1isbigger:
-                case values1more:
+                case Counter1isBigger:
+                case Values1more:
                     if (vector1isbigger) return true;
                     isStrict = true;
                     break;
-                case counter1islesser:
-                case values1fewer:
+                case Counter1islesser:
+                case Values1fewer:
                     if (vector1.Count < vector2.Count) return false;
                     isStrict = false;
                     break;
@@ -298,7 +353,7 @@ namespace LUC.DVVSet
                     //if(!isStrict&!vector1isbigger)return false;
                     break;
             }
-            KeyValuePair<string, Vector> node;
+            KeyValuePair<String, Vector> node;
             if (vector1isbigger)
             {
                 node = vector1.ToArray()[count];
@@ -312,24 +367,47 @@ namespace LUC.DVVSet
             return isStrict;
         }
 
-        //Returns the total number of values in this clock set.
-        public static int Size(Clock clock)
+        /// <summary>
+        /// Size of Clock value
+        /// </summary>
+        /// <param name="clock"></param>
+        /// <returns>Returns the total number of values in this clock set.</returns>
+        public static Int32 Size(Clock clock)
         {
-            int result = 0;
+            var result = 0;
             foreach(var i in clock.Entries)result += i.Value.Values.Count;
             result += clock.ClockValues.Count;
             return result;
         }
 
-        public static List<string> Ids(Clock clock) => clock.Entries.Keys as List<string>;
-
-        /*
-        * Returns all the values used in this clock set,
-        * including the anonymous values.
-        */
-        public static List<string> ListValues(Clock clock)
+        /// <summary>
+        /// Number of Entries in the Clock value
+        /// </summary>
+        /// <param name="clock"></param>
+        /// <returns></returns>
+        public static Int32 Count(Clock clock)
         {
-            var result = new List<string>();
+            return clock.Entries.Count;
+        }
+
+        /// <summary>
+        /// List of ID in the Clock value
+        /// </summary>
+        /// <param name="clock"></param>
+        /// <returns></returns>
+        public static List<String> Ids(Clock clock)
+        {
+            return clock.Entries.Keys as List<String>;
+        }
+
+        /// <summary>
+        /// Returns all the values used in this clock set, including the anonymous values.
+        /// </summary>
+        /// <param name="clock"></param>
+        /// <returns></returns>
+        public static List<String> ListValues(Clock clock)
+        {
+            var result = new List<String>();
             foreach (var i in clock.Entries)
             {
                 result.AddRange(i.Value.Values);
@@ -338,16 +416,21 @@ namespace LUC.DVVSet
             return result;
         }
 
-        /*
-         * Compares the equality of both clocks, regarding
-         * only the causal histories, thus ignoring the values.
-         */
-        public static bool Equal(Clock clock1, Clock clock2) => Equal(clock1.Entries, clock2.Entries);
+        /// <summary>
+        /// Compares the equality of both clocks, regarding only the causal histories, thus ignoring the values.
+        /// </summary>
+        /// <param name="clock1"></param>
+        /// <param name="clock2"></param>
+        /// <returns>True if Clock values are equal, or false.</returns>
+        public static Boolean Equal(Clock clock1, Clock clock2)
+        {
+            return Equal(clock1.Entries, clock2.Entries);
+        }
 
-        private static bool Equal(SortedList<string, Vector> vector1, SortedList<string, Vector> vector2)
+        private static Boolean Equal(SortedList<String, Vector> vector1, SortedList<String, Vector> vector2)
         {
             if (vector1.Count != vector2.Count) return false;
-            for (int i = 0; i < vector2.Count; i++)
+            for (var i = 0; i < vector2.Count; i++)
             {
                 var node1 = vector1.ToArray()[i];
                 var node2 = vector2.ToArray()[i];

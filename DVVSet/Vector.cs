@@ -3,23 +3,44 @@ using System.Collections.Generic;
 
 namespace LUC.DVVSet
 {
+    /// <summary>
+    /// Constructs a Vector value
+    /// </summary>
     public class Vector //[{id(), counter()}, {values()}}].
     {
-        public int Counter { get; set; }
-        public List<string> Values { get; set; }
+        /// <summary>
+        /// integer value, counts every logical tick of clocks
+        /// </summary>
+        public Int32 Counter { get; set; }
+        /// <summary>
+        /// Any information, needed for work with DVVSet. 
+        /// </summary>
+        public List<String> Values { get; set; }
 
+        /// <summary>
+        /// Empty exemplar of Vector value
+        /// </summary>
         public Vector()
         {
         }
 
-        public Vector(int counter, List<string> values)
+        /// <summary>
+        /// New Vector value with prepared Counter and Values
+        /// </summary>
+        /// <param name="counter"></param>
+        /// <param name="values"></param>
+        public Vector(Int32 counter, List<String> values)
         {
             Counter = counter;
             Values = values;
         }
 
-
-        public void Deconstruct(out int counter, out List<string> values)
+        /// <summary>
+        /// Deconstructs Vector to Counter and Values.
+        /// </summary>
+        /// <param name="counter"></param>
+        /// <param name="values"></param>
+        public void Deconstruct(out Int32 counter, out List<String> values)
         {
             counter = Counter;
             values = Values;
@@ -34,12 +55,21 @@ namespace LUC.DVVSet
         //           EqualityComparer<List<string>>.Default.Equals(Values, vector.Values);
         //}
 
-        public override int GetHashCode()
+#pragma warning disable CS1591 // Отсутствует комментарий XML для открытого видимого типа или члена
+        public override Int32 GetHashCode()
+#pragma warning restore CS1591 // Отсутствует комментарий XML для открытого видимого типа или члена
         {
             return HashCode.Combine(Counter, Values);
         }
 
-        protected static void AddEntries(SortedList<string, Vector> entries, string id="", int counter=0, List<string> values=null)
+        /// <summary>
+        /// Adds single entry to Entries
+        /// </summary>
+        /// <param name="entries"></param>
+        /// <param name="id"></param>
+        /// <param name="counter"></param>
+        /// <param name="values"></param>
+        protected static void AddEntries(SortedList<String, Vector> entries, String id ="", Int32 counter =0, List<String> values=null)
         {
             var vector = new Vector
             {

@@ -1,0 +1,183 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>LUC.DVVSet</name>
+    </assembly>
+    <members>
+        <member name="T:LUC.DVVSet.Clock">
+            <summary>
+            Constructor class
+            Clock includes two values - Entries and ClockValues
+            Entries is a sorted list, in which key is a string value and the values ​​are Vector value from the Vector class.
+            </summary>
+        </member>
+        <member name="P:LUC.DVVSet.Clock.Entries">
+            <summary>
+            {id,{counter,{values}}
+            Each operation with clock causes a counter increment. Id is a unique value, entries in the clock cannot have the same id value.
+            </summary>
+        </member>
+        <member name="P:LUC.DVVSet.Clock.ClockValues">
+            <summary>
+            Array of strings with information about current Entry. 
+            </summary>
+        </member>
+        <member name="M:LUC.DVVSet.Clock.#ctor">
+            <summary>
+            Default Clock with empty Entries and ClockValues
+            </summary>
+        </member>
+        <member name="M:LUC.DVVSet.Clock.#ctor(System.Collections.Generic.SortedList{System.String,LUC.DVVSet.Vector})">
+            <summary>
+            Clock with prepared Entries and empty ClockValues
+            </summary>
+            <param name="entries">{id,{counter,{values}}</param>
+        </member>
+        <member name="M:LUC.DVVSet.Clock.#ctor(System.String)">
+            <summary>
+            Clock with empty Entries and single ClockValue
+            </summary>
+            <param name="value">String value</param>
+        </member>
+        <member name="M:LUC.DVVSet.Clock.#ctor(System.Collections.Generic.List{System.String})">
+            <summary>
+            Clock with empty Entries and prepared ClockValues
+            </summary>
+            <param name="clockValues">List of string values</param>
+        </member>
+        <member name="M:LUC.DVVSet.Clock.#ctor(System.Collections.Generic.SortedList{System.String,LUC.DVVSet.Vector},System.Collections.Generic.List{System.String})">
+            <summary>
+            Makes a Clock with prepared Entries and ClockValues
+            </summary>
+            <param name="entries">{id,{counter,{values}}</param>
+            <param name="clockValues">List of string values</param>
+        </member>
+        <member name="M:LUC.DVVSet.Clock.#ctor(System.Collections.Generic.SortedList{System.String,LUC.DVVSet.Vector},System.String)">
+            <summary>
+            Makes a Clock with prepared Entries and single ClockValue
+            </summary>
+            <param name="entries">{id,{counter,{values}}</param>
+            <param name="value">String value</param>
+        </member>
+        <member name="M:LUC.DVVSet.Clock.Deconstruct(System.Collections.Generic.SortedList{System.String,LUC.DVVSet.Vector}@,System.Collections.Generic.List{System.String}@)">
+            <summary>
+            Deconstructs Clock to two values, Entries and ClockValues.
+            Usage: var (entries1, values1) = clock1;
+            </summary>
+            <param name="entries">Entries from Clock</param>
+            <param name="values">ClockValues from Clock</param>
+        </member>
+        <member name="M:LUC.DVVSet.Clock.ClockToString(System.Object,System.Boolean)">
+            <summary>
+            Translates Clock to Json-string format. Can translate to Json-serializable format.
+            </summary>
+            <param name="clocks"></param>
+            <param name="tests"></param>
+            <returns></returns>
+        </member>
+        <member name="M:LUC.DVVSet.Clock.ClockToList(System.Object)">
+            <summary>
+            Translate Entries from sorted list to list of objects. This is alternative format of Clock, if needed.
+            </summary>
+            <param name="clocks"></param>
+            <returns>List of objects</returns>
+        </member>
+        <member name="M:LUC.DVVSet.Clock.StringToClock(System.String)">
+            <summary>
+            Transforms Json-string to Clock value
+            </summary>
+            <param name="version"></param>
+            <returns></returns>
+        </member>
+        <member name="T:LUC.DVVSet.ClockToList">
+            <summary>
+            This class needed for transform Clock to list of objects.
+            </summary>
+        </member>
+        <member name="P:LUC.DVVSet.ClockToList.Key">
+            <summary>
+            ID of clock
+            </summary>
+        </member>
+        <member name="P:LUC.DVVSet.ClockToList.Counter">
+            <summary>
+            Logical "tick" of clock, counter
+            </summary>
+        </member>
+        <member name="P:LUC.DVVSet.ClockToList.Values">
+            <summary>
+            List of values
+            </summary>
+        </member>
+        <member name="M:LUC.DVVSet.ClockToList.#ctor(System.String,System.Int32,System.Collections.Generic.List{System.String})">
+            <summary>
+            Makes a new exemplar of ClockToList with prepared values
+            </summary>
+            <param name="key"></param>
+            <param name="counter"></param>
+            <param name="values"></param>
+        </member>
+        <member name="M:LUC.DVVSet.ClockToList.#ctor">
+            <summary>
+            Makes a new exemplar of ClockToList
+            </summary>
+        </member>
+        <member name="T:LUC.DVVSet.Dvvdotnet">
+            <summary>
+            Methods for work with DVVSet
+            </summary>
+        </member>
+        <member name="M:LUC.DVVSet.Dvvdotnet.Join(LUC.DVVSet.Clock)">
+            <summary>
+            Return a version vector that represents the causal history.
+            </summary>
+            <param name="clock"></param>
+            <returns></returns>
+        </member>
+        <member name="M:LUC.DVVSet.Dvvdotnet.Update(LUC.DVVSet.Clock,System.String,LUC.DVVSet.Clock)">
+            <summary>
+            Advances the causal history of the first clock with the given id, while synchronizing
+            with the second clock, thus the new clock is causally newer than both clocks in the argument.
+            </summary>
+            <param name="clock1">First clock. SHOULD BE a direct result of new/2, which is intended to be the client clock 
+            with the new value in the* anonymous dot*</param>
+            <param name="theId">Given id</param>
+            <param name="clock2">Second clock from the local server.</param>
+            <returns>New value is the *anonymous dot* of the clock.</returns>
+        </member>
+        <member name="M:LUC.DVVSet.Dvvdotnet.Entry(LUC.DVVSet.Clock,System.String,System.String)">
+            <summary>
+            Created a new event on the synced causal history, with the id and the new value.
+            The anonymous values that were synced still remain.
+            </summary>
+            <param name="clock"></param>
+            <param name="theId"></param>
+            <param name="value">Optional string value, if needed</param>
+            <returns></returns>
+        </member>
+        <member name="M:LUC.DVVSet.Dvvdotnet.SyncClocks(LUC.DVVSet.Clock,LUC.DVVSet.Clock)">
+            <summary>
+            Synchronizes a list of clocks. It discards (causally) outdated values, while merging all causal histories. 
+            </summary>
+            <param name="clock1"></param>
+            <param name="clock2"></param>
+            <returns>Synchronized Clock value</returns>
+        </member>
+        <member name="M:LUC.DVVSet.Dvvdotnet.Less(LUC.DVVSet.Clock,LUC.DVVSet.Clock)">
+            <summary>
+            Returns True if the first clock is causally older than the second clock, thus values on the first clock are outdated.
+            Returns False otherwise.
+            </summary>
+            <param name="clock1"></param>
+            <param name="clock2"></param>
+            <returns></returns>
+        </member>
+        <member name="M:LUC.DVVSet.Dvvdotnet.Size(LUC.DVVSet.Clock)">
+            <summary>
+            Size of Clock value
+            </summary>
+            <param name="clock"></param>
+            <returns>Returns the total number of values in this clock set.</returns>
+        </member>
+    </members>
+</doc>

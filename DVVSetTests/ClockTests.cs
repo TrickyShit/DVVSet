@@ -2,17 +2,20 @@
 using LUC.DVVSet;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using static LUC.DVVSet.Dvvdotnet;
+using static LUC.DVVSet.Clock;
+
 namespace DVVSetTests
 {
     [TestClass()]
-    public class ClockTests : Dvvdotnet
+    public class ClockTests
     {
         [TestMethod()]
         public void NewWithHistoryTest()
         {
             var a = new Clock("v1");
-            var a1 = Update(a, "a");
-            var b = new Clock(Join(a1), "v2");
+            var a1 = Dvvdotnet.Update(a, "a");
+            var b = new Clock(Dvvdotnet.Join(a1), "v2");
             var b1 = Update(b, "b", a1);
             Assert.AreEqual(ClockToString(a), "[],[v1];");
             Assert.AreEqual(ClockToString(a1), "[{a,1,[v1]}],[];");
@@ -68,10 +71,10 @@ namespace DVVSetTests
         [TestMethod()]
         public void SyncupdateTest()
         {
-            var a0 = Update(new Clock(new List<string> { "v1" }), "a");            // Mary writes v1 w / o VV
+            var a0 = Update(new Clock(new List<System.String> { "v1" }), "a");            // Mary writes v1 w / o VV
             var vv1 = Join(a0);                                                 // Peter reads v1 with version vector(VV)
-            var a1 = Update(new Clock(new List<string> { "v2" }), "a", a0);       // Mary writes v2 w / o VV
-            var a2 = Update(new Clock(vv1, new List<string> { "v3" }), "a", a1);   // Peter writes v3 with VV from v1
+            var a1 = Update(new Clock(new List<System.String> { "v2" }), "a", a0);       // Mary writes v2 w / o VV
+            var a2 = Update(new Clock(vv1, new List<System.String> { "v3" }), "a", a1);   // Peter writes v3 with VV from v1
             Assert.AreEqual(ClockToString(vv1), "[{a,1,[]}],[];");
             Assert.AreEqual(ClockToString(a0), "[{a,1,[v1]}],[];");
             Assert.AreEqual(ClockToString(a1), "[{a,2,[v2][v1]}],[];");
@@ -114,26 +117,26 @@ namespace DVVSetTests
         [TestMethod()]
         public void EqualTest()
         {
-            Clock a = new Clock();            //[{a,4,[v5][v0]}],[{b,0,[]}],[{c,1,[v3]}],[v0]
-            var a1 = new KeyValuePair<string, Vector>("a", new Vector(4, new List<string> { "v5", "v0" }));
-            var a2 = new KeyValuePair<string, Vector>("b", new Vector(0, new List<string>()));
-            var a3 = new KeyValuePair<string, Vector>("c", new Vector(1, new List<string> { "v3" }));
+            var a = new Clock();            //[{a,4,[v5][v0]}],[{b,0,[]}],[{c,1,[v3]}],[v0]
+            var a1 = new KeyValuePair<System.String, Vector>("a", new Vector(4, new List<System.String> { "v5", "v0" }));
+            var a2 = new KeyValuePair<System.String, Vector>("b", new Vector(0, new List<System.String>()));
+            var a3 = new KeyValuePair<System.String, Vector>("c", new Vector(1, new List<System.String> { "v3" }));
             a.Entries.Add(a1.Key, a1.Value);
             a.Entries.Add(a2.Key, a2.Value);
             a.Entries.Add(a3.Key, a3.Value);
             a.ClockValues.Add("v0");
 
-            Clock b = new Clock();              //[{a,4,[v555,v0]}],[{b,0,[]}],[{c,1,[v3]}],[];
-            var b1 = new KeyValuePair<string, Vector>("a", new Vector(4, new List<string> { "v555", "v0" }));
-            var b2 = new KeyValuePair<string, Vector>("b", new Vector(0, new List<string>()));
-            var b3 = new KeyValuePair<string, Vector>("c", new Vector(1, new List<string> { "v3" }));
+            var b = new Clock();              //[{a,4,[v555,v0]}],[{b,0,[]}],[{c,1,[v3]}],[];
+            var b1 = new KeyValuePair<System.String, Vector>("a", new Vector(4, new List<System.String> { "v555", "v0" }));
+            var b2 = new KeyValuePair<System.String, Vector>("b", new Vector(0, new List<System.String>()));
+            var b3 = new KeyValuePair<System.String, Vector>("c", new Vector(1, new List<System.String> { "v3" }));
             b.Entries.Add(b1.Key, b1.Value);
             b.Entries.Add(b2.Key, b2.Value);
             b.Entries.Add(b3.Key, b3.Value);
 
-            Clock c = new Clock();              //[{a,4,[v5,v0]}],[{b,0,[]}],[v6,v1];
-            var c1 = new KeyValuePair<string, Vector>("a", new Vector(4, new List<string> { "v5", "v0" }));
-            var c2 = new KeyValuePair<string, Vector>("b", new Vector(0, new List<string>()));
+            var c = new Clock();              //[{a,4,[v5,v0]}],[{b,0,[]}],[v6,v1];
+            var c1 = new KeyValuePair<System.String, Vector>("a", new Vector(4, new List<System.String> { "v5", "v0" }));
+            var c2 = new KeyValuePair<System.String, Vector>("b", new Vector(0, new List<System.String>()));
             c.Entries.Add(c1.Key, c1.Value);
             c.Entries.Add(c2.Key, c2.Value);
             c.ClockValues.Add("v6");
@@ -148,10 +151,10 @@ namespace DVVSetTests
         [TestMethod()]
         public void SizeTest()
         {
-            Clock a = new Clock();            //[{a,4,[v5][v0]}],[{b,0,[]}],[{c,1,[v3]}],[v4][v1]
-            var a1 = new KeyValuePair<string, Vector>("a", new Vector(4, new List<string> { "v5", "v0" }));
-            var a2 = new KeyValuePair<string, Vector>("b", new Vector(0, new List<string>()));
-            var a3 = new KeyValuePair<string, Vector>("c", new Vector(1, new List<string> { "v3" }));
+            var a = new Clock();            //[{a,4,[v5][v0]}],[{b,0,[]}],[{c,1,[v3]}],[v4][v1]
+            var a1 = new KeyValuePair<System.String, Vector>("a", new Vector(4, new List<System.String> { "v5", "v0" }));
+            var a2 = new KeyValuePair<System.String, Vector>("b", new Vector(0, new List<System.String>()));
+            var a3 = new KeyValuePair<System.String, Vector>("c", new Vector(1, new List<System.String> { "v3" }));
             a.Entries.Add(a1.Key, a1.Value);
             a.Entries.Add(a2.Key, a2.Value);
             a.Entries.Add(a3.Key, a3.Value);
