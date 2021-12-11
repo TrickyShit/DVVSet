@@ -112,58 +112,61 @@ namespace LUC.DVVSet
         /// <returns></returns>
         public static String ClockToString(Object clocks, Boolean tests = false)
         {
+            var result = "";
             var spacer = "";
             if (!tests)
                 spacer = "\"";
             var clock = new Clock();
-            if (tests && clocks.GetType() == typeof(SortedList<String, Vector>))
+            if (tests)
             {
-                clock.Entries = clocks as SortedList<String, Vector>;
-                clock.ClockValues = new List<String>();
+                if (clocks.GetType() == typeof(SortedList<String, Vector>))
+                {
+                    clock.Entries = clocks as SortedList<String, Vector>;
+                    clock.ClockValues = new List<String>();
+                }
             }
 
             if (clocks.GetType() == typeof(Clock))
             {
                 clock = clocks as Clock;
             }
-
-            StringBuilder result = new StringBuilder();
-
             if (clock.Entries.Count > 0)
             {
                 var count = 0;
                 foreach (var keyvalue in clock.Entries)
                 {
                     if (tests)
-                        result.Append("[{");
+                        result += "[{";
                     else
-                        result.Append("[[[");
-                    result.Append($"{spacer}{keyvalue.Key}{spacer},{keyvalue.Value.Counter},");
+                        result += "[[[";
+                    result += $"{spacer}{keyvalue.Key}{spacer},{keyvalue.Value.Counter},";
                     if (keyvalue.Value.Values.Count == 0)
-                        result.Append("[]");
+                        result += "[]";
                     else
-                        result.Append(keyvalue.Value.Values.Aggregate(result.ToString(), (current, i) => $"{current}[{spacer}{i}{spacer}]"));
+                        result = keyvalue.Value.Values.Aggregate(result, (current, i) => $"{current}[{spacer}{i}{spacer}]");
                     if (tests)
-                        result.Append("}],");
+                        result += "}],";
                     else
-                        result.Append("]],");
+                        result += "]],";
+                    //if (clock.ClockValues.Any()) result += "[" + clock.ClockValues[count] + "];";
+                    //else result+="[];";
                     count++;
                 }
             }
             else
             {
-                result.Append("[],");
+                result += "[],";
             }
 
             if (clock.ClockValues.Any())
-                result.Append("[" + spacer + clock.ClockValues.Aggregate((current, i) => current + "[" + i + "]") + "]");
+                result += "[" + spacer + clock.ClockValues.Aggregate((current, i) => current + "[" + i + "]") + "]";
             else
-                result.Append("[]");
+                result += "[]";
             if (tests)
-                result.Append(';');
+                result += ";";
             else
-                result.Append(']');
-            return result.ToString();
+                result += "]";
+            return result;
         }
 
         /// <summary>
@@ -212,20 +215,11 @@ namespace LUC.DVVSet
         public static Clock StringToClock(String version)
         {
             var testsarray = Encoding.UTF8.GetString(Convert.FromBase64String(version));
-            IList objectList;
-            try
-            {
-                objectList = JsonConvert.DeserializeObject<IList>(testsarray);
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-
+            var objectList = JsonConvert.DeserializeObject<IList>(testsarray);
             var incomeClock = new Clock();
             var incomeEntries = incomeClock.Entries;
 
-            foreach (var objectEntries in (IList)objectList[0])
+            foreach (var objectEntries in (IList) objectList[0])
             {
                 var entriesList = objectEntries as IList;
                 var incomeVector = new Vector
@@ -236,7 +230,7 @@ namespace LUC.DVVSet
 
                 if (entriesList.Count == 3)
                 {
-                    var values = (IList)entriesList[2];
+                    var values = (IList) entriesList[2];
                     foreach (var objectValues in values)
                     {
                         var value = objectValues.ToString();
@@ -253,7 +247,7 @@ namespace LUC.DVVSet
             else
             {
                 var clockValues = new List<String>();
-                var values = (IList)objectList[1];
+                var values = (IList) objectList[1];
                 foreach (var objectValues in values)
                 {
                     clockValues.Add(objectValues.ToString());

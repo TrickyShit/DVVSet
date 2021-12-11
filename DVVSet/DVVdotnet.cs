@@ -326,16 +326,14 @@ namespace LUC.DVVSet
             }
             if (!vector2.Any()) return true;
             if (!vector1.Any()) return false;
-
+            //if (vector1.Count > vector2.Count) return true;
+            //if (vector2.Count > vector1.Count) return false;
             var isStrict = false;
             var count = vector1.Count < vector2.Count ? vector1.Count : vector2.Count;
             var vector1isbigger = vector1.Count > vector2.Count;
-            
             var node1 = vector1.ToArray()[count - 1];
             var node2 = vector2.ToArray()[count - 1];
-            
             if (!node1.Key.Equals(node2.Key)) return false;
-
             switch (ComparePairs(node1, node2))
             {
                 case Counter1isBigger:
