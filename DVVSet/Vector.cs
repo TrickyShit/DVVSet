@@ -55,13 +55,6 @@ namespace LUC.DVVSet
         //           EqualityComparer<List<string>>.Default.Equals(Values, vector.Values);
         //}
 
-#pragma warning disable CS1591 // Отсутствует комментарий XML для открытого видимого типа или члена
-        public override Int32 GetHashCode()
-#pragma warning restore CS1591 // Отсутствует комментарий XML для открытого видимого типа или члена
-        {
-            return HashCode.Combine(Counter, Values);
-        }
-
         /// <summary>
         /// Adds single entry to Entries
         /// </summary>

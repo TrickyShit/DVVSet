@@ -35,7 +35,7 @@ namespace DVVSetTests
             Assert.AreEqual(ClockToString(a1), "[{a,2,[v2]}],[];");
             Assert.AreEqual(ClockToString(a2), "[{a,2,[]}],[{b,1,[v3]}],[];");
             Assert.AreEqual(ClockToString(a3), "[{a,2,[v2]}],[{b,1,[v4]}],[];");
-            Assert.AreEqual(ClockToString(a4), "[{a,3,[v5][v2]}],[];");     //little change to string because i don`t want change ClockToString :)
+            Assert.AreEqual(ClockToString(a4), "[{a,3,[v5][v2]}],[];");    
         }
 
         [TestMethod()]
