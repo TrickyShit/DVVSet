@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace LUC.DVVSet
 {
@@ -143,7 +144,11 @@ namespace LUC.DVVSet
                     if (keyvalue.Value.Values.Count == 0)
                         result += "[]";
                     else
-                        result = keyvalue.Value.Values.Aggregate(result, (current, i) => $"{current}[{spacer}{i}{spacer}]");
+                        result = keyvalue.Value.Values.Aggregate(result, (current, i) =>
+                        {
+                            i = i.Replace("\r\n", "");
+                            return $"{current}[{i}]";
+                        });
                     if (tests)
                         result += "}],";
                     else
@@ -215,39 +220,89 @@ namespace LUC.DVVSet
         public static Clock StringToClock(String version)
         {
             var testsarray = Encoding.UTF8.GetString(Convert.FromBase64String(version));
-            var objectList = JsonConvert.DeserializeObject<IList>(testsarray);
+
+            var objectList = new JArray();
+            try
+            {
+                objectList = JsonConvert.DeserializeObject<JArray>(testsarray);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            return ObjectToClock(objectList);
+        }
+
+        private static Clock ObjectToClock(JArray clockList)
+        {
             var incomeClock = new Clock();
             var incomeEntries = incomeClock.Entries;
+            var cycleCount = 0;
+            var foo = clockList.Values();
 
-            foreach (var objectEntries in (IList) objectList[0])
+            foreach (var objectEntries in foo)
             {
-                var entriesList = objectEntries as IList;
-                var incomeVector = new Vector
+                var clockValues = new ArrayList();
+
+                //if recurse runs
+                if (objectEntries.GetType().Equals(typeof(JValue)) || cycleCount > 0)
                 {
-                    Counter = Convert.ToInt32(entriesList[1]),
-                    Values = new List<String>()
-                };
+                    cycleCount++;
+                    switch (cycleCount)
+                    {
+                        case 1:
+                            clockValues.Add(objectEntries.ToString());
+                            break;
+                        case 2:
+                            try
+                            {
+                                clockValues.Add(Int32.Parse(objectEntries.ToString()));
+                            }
+                            catch
+                            {
+                                clockValues.Add(objectEntries.ToString());
+                            }
+                            break;
+                        case 3:
+                            clockValues.Add((IList)objectEntries);
+                            break;
+                        default:
+                            break;
+                    }
+                    continue;
+                }
+
+                var entriesList = objectEntries.ToObject<JArray>();
+
 
                 if (entriesList.Count == 3)
                 {
-                    var values = (IList) entriesList[2];
+                    var incomeVector = new Vector
+                    {
+                        Counter = (entriesList[1]).ToObject<int>(),
+                        Values = new List<String>()
+                    };
+
+                    var values = entriesList[2];
                     foreach (var objectValues in values)
                     {
-                        var value = objectValues.ToString();
-                        incomeVector.Values.Add(value);
+                        //var value = ClockToString(ObjectToClock(objectValues));
+                        incomeVector.Values.Add(objectValues.ToString());
                     }
+
+                    incomeEntries.Add(entriesList[0].ToString(), incomeVector);
                 }
-                incomeEntries.Add(entriesList[0].ToString(), incomeVector);
             }
 
-            if (objectList.Count == 1)
+            if (clockList.Count == 1)
             {
                 incomeClock.ClockValues = new List<String>();
             }
             else
             {
                 var clockValues = new List<String>();
-                var values = (IList) objectList[1];
+                var values = (IList)clockList[1];
+
                 foreach (var objectValues in values)
                 {
                     clockValues.Add(objectValues.ToString());
