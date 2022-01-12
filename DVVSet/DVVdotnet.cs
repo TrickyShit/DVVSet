@@ -112,34 +112,34 @@ namespace LUC.DVVSet
             Int32 comparison;
             switch (values1.Count)
             {
-            case 0:
-                values.Add(values2[0]);
-                break;
-            default:
-                if (values2.Count == 0)
-                {
-                    values.Add(values1[0]);
-                }
-                else
-                {
-                    comparison = String.Compare(values1[0], values2[0], comparisonType: StringComparison.Ordinal);
-                    if (comparison > 0)
+                case 0:
+                    values.Add(values2[0]);
+                    break;
+                default:
+                    if (values2.Count == 0)
                     {
-                        values.Add(values1[0]);
-                        values.Add(values2[0]);
-                    }
-                    else if (comparison < 0)
-                    {
-                        values.Add(values2[0]);
                         values.Add(values1[0]);
                     }
                     else
                     {
-                        values.Add(values1[0]);
+                        comparison = String.Compare(values1[0], values2[0], comparisonType: StringComparison.Ordinal);
+                        if (comparison > 0)
+                        {
+                            values.Add(values1[0]);
+                            values.Add(values2[0]);
+                        }
+                        else if (comparison < 0)
+                        {
+                            values.Add(values2[0]);
+                            values.Add(values1[0]);
+                        }
+                        else
+                        {
+                            values.Add(values1[0]);
+                        }
                     }
-                }
 
-                break;
+                    break;
             }
             var value = new Vector(count, values);
             var result = new KeyValuePair<String, Vector>(id, value);
@@ -252,15 +252,15 @@ namespace LUC.DVVSet
                         }
                         else
                             if (head1.Value.Values.Count > 0)
-                    {
-                        headresult.Values[0].Values.Add(head1.Value.Values[0]);
-                    }
-                    else
-                    {
-                        headresult.Add(head1.Key, head1.Value);
-                    }
+                        {
+                            headresult.Values[0].Values.Add(head1.Value.Values[0]);
+                        }
+                        else
+                        {
+                            headresult.Add(head1.Key, head1.Value);
+                        }
 
-                    break;
+                        break;
                     case Values1fewer:
                         if (head2.Value.Values.Count > 0 && head1.Value.Values.Count > 0)
                         {
@@ -268,11 +268,11 @@ namespace LUC.DVVSet
                             headresult.Add(mergepair.Key, mergepair.Value);
                         }
                         else
-                    {
-                        headresult.Add(head2.Key, head2.Value);
-                    }
+                        {
+                            headresult.Add(head2.Key, head2.Value);
+                        }
 
-                    break;
+                        break;
                     default:
                         if (!head1.Value.Values.Equals(head2.Value.Values) && head1.Value.Values.Count > 0)
                         {
@@ -280,11 +280,11 @@ namespace LUC.DVVSet
                             result.Add(mergepair.Key, mergepair.Value);
                         }
                         else
-                    {
-                        result.Add(head1.Key, head1.Value);
-                    }
+                        {
+                            result.Add(head1.Key, head1.Value);
+                        }
 
-                    break;
+                        break;
                 }
                 if (headresult.Count > 0) result.Add(headresult.Keys[0], headresult.Values[0]);
                 if (entry2.Count > 0) entry2.RemoveAt(0);
@@ -375,7 +375,7 @@ namespace LUC.DVVSet
         public static Int32 Size(Clock clock)
         {
             var result = 0;
-            foreach(var i in clock.Entries)result += i.Value.Values.Count;
+            foreach (var i in clock.Entries) result += i.Value.Values.Count;
             result += clock.ClockValues.Count;
             return result;
         }

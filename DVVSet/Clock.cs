@@ -15,11 +15,13 @@ using Newtonsoft.Json.Linq;
 
 namespace LUC.DVVSet
 {
+
     /// <summary>
     /// Constructor class
     /// Clock includes two values - Entries and ClockValues
     /// Entries is a sorted list, in which key is a string value and the values ​​are Vector value from the Vector class.
     /// </summary>
+    [Serializable]
     public class Clock //{entries(), values()}
     {
         /// <summary>
@@ -118,13 +120,10 @@ namespace LUC.DVVSet
             if (!tests)
                 spacer = "\"";
             var clock = new Clock();
-            if (tests)
+            if (tests && clocks.GetType() == typeof(SortedList<String, Vector>))
             {
-                if (clocks.GetType() == typeof(SortedList<String, Vector>))
-                {
-                    clock.Entries = clocks as SortedList<String, Vector>;
-                    clock.ClockValues = new List<String>();
-                }
+                clock.Entries = clocks as SortedList<String, Vector>;
+                clock.ClockValues = new List<String>();
             }
 
             if (clocks.GetType() == typeof(Clock))
@@ -192,23 +191,33 @@ namespace LUC.DVVSet
             {
                 clock = clocks as Clock;
             }
+
             if (clock.Entries.Count > 0)
             {
-                var listvalue = new ClockToList();
+                //var listvalue = new ClockToList();
                 foreach (var keyvalue in clock.Entries)
                 {
-                    listvalue.Key = keyvalue.Key;
-                    listvalue.Counter = keyvalue.Value.Counter;
-                    listvalue.Values = keyvalue.Value.Values;
+                    var listvalue = new List<Object>
+                    {
+                        keyvalue.Key,
+                        keyvalue.Value.Counter,
+                        keyvalue.Value.Values
+                    };
                     result.Add(listvalue);
-                    if (keyvalue.Value.Values.Count == 0)
-                        result.Add(new List<String>());
-                    else
-                        result.Add(keyvalue.Value.Values);
+                    //if (keyvalue.Value.Values.Count == 0)
+                    //    result.Add(new List<String>());
+                    //else
+                    //    result.Add(keyvalue.Value.Values);
                 }
+            }
+            else
+            {
+                result.Add(new List<String>());
             }
             if (clock.ClockValues.Any())
                 result.Add(clock.ClockValues);
+            else
+                result.Add(new List<String>());
             return result;
         }
 
@@ -274,7 +283,6 @@ namespace LUC.DVVSet
 
                 var entriesList = objectEntries.ToObject<JArray>();
 
-
                 if (entriesList.Count == 3)
                 {
                     var incomeVector = new Vector
@@ -311,42 +319,5 @@ namespace LUC.DVVSet
             }
             return incomeClock;
         }
-    }
-
-    /// <summary>
-    /// This class needed for transform Clock to list of objects.
-    /// </summary>
-    public class ClockToList
-    {
-        /// <summary>
-        /// ID of clock
-        /// </summary>
-        public String Key { get; set; }
-        /// <summary>
-        /// Logical "tick" of clock, counter
-        /// </summary>
-        public Int32 Counter { get; set; }
-        /// <summary>
-        /// List of values
-        /// </summary>
-        public List<String> Values { get; set; }
-
-        /// <summary>
-        /// Makes a new exemplar of ClockToList with prepared values
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="counter"></param>
-        /// <param name="values"></param>
-        public ClockToList(String key, Int32 counter, List<String> values)
-        {
-            Key = key;
-            Counter = counter;
-            Values = values;
-        }
-
-        /// <summary>
-        /// Makes a new exemplar of ClockToList
-        /// </summary>
-        public ClockToList() { }
     }
 }

@@ -24,12 +24,15 @@ Original code: https://github.com/ricardobcl/Dotted-Version-Vectors</Description
     <UserSecretsId>f4f95791-756f-40ac-8da5-4a77026e5226</UserSecretsId>
     <AssemblyVersion>1.0.1.0</AssemblyVersion>
     <FileVersion>1.0.1.0</FileVersion>
-    <Version>1.0.0.3</Version>
-    <PackageReleaseNotes>Added method StringToClock. Now we have a self-made serialization and deserialization of Clock values.</PackageReleaseNotes>
+    <Version>1.0.1</Version>
+    <PackageReleaseNotes>Improved ClockToString and StringToClock</PackageReleaseNotes>
     <RepositoryType>Library</RepositoryType>
     <PackageIcon>simply-midnight-black-wall-clocks.jpg</PackageIcon>
     <PackageIconUrl />
     <ApplicationIcon>clock_icon_128908.ico</ApplicationIcon>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>vectorclock; dottedversionvectorclock;</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -56,6 +59,10 @@ Original code: https://github.com/ricardobcl/Dotted-Version-Vectors</Description
     <None Include="..\..\simply-midnight-black-wall-clocks.jpg">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
 

@@ -1,9 +1,14 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json;
+
 using LUC.DVVSet;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using static LUC.DVVSet.Dvvdotnet;
+
+
 using static LUC.DVVSet.Clock;
+using static LUC.DVVSet.Dvvdotnet;
 
 namespace DVVSetTests
 {
@@ -14,13 +19,14 @@ namespace DVVSetTests
         public void NewWithHistoryTest()
         {
             var a = new Clock("v1");
-            var a1 = Dvvdotnet.Update(a, "a");
-            var b = new Clock(Dvvdotnet.Join(a1), "v2");
+            var a1 = Update(a, "a");
+            var b = new Clock(Join(a1), "v2");
             var b1 = Update(b, "b", a1);
-            Assert.AreEqual(ClockToString(a), "[],[v1];");
-            Assert.AreEqual(ClockToString(a1), "[{a,1,[v1]}],[];");
-            Assert.AreEqual(ClockToString(b), "[{a,1,[]}],[v2];");
-            Assert.AreEqual(ClockToString(b1), "[{a,1,[]}],[{b,1,[v2]}],[];");
+
+            Assert.AreEqual("[[],[\"v1\"]]", JsonSerializer.Serialize(ClockToList(a)));
+            Assert.AreEqual("[[\"a\",1,[\"v1\"]],[]]", JsonSerializer.Serialize(ClockToList(a1)));
+            Assert.AreEqual("[[\"a\",1,[]],[\"v2\"]]", JsonSerializer.Serialize(ClockToList(b)));
+            Assert.AreEqual("[[\"a\",1,[]],[\"b\",1,[\"v2\"]],[]]", JsonSerializer.Serialize(ClockToList(b1)));
         }
 
         [TestMethod()]
@@ -31,11 +37,11 @@ namespace DVVSetTests
             var a2 = Update(new Clock(Join(a1), "v3"), "b", a1);
             var a3 = Update(new Clock(Join(a0), "v4"), "b", a1);
             var a4 = Update(new Clock(Join(a0), "v5"), "a", a1);
-            Assert.AreEqual(ClockToString(a0), "[{a,1,[v1]}],[];");
-            Assert.AreEqual(ClockToString(a1), "[{a,2,[v2]}],[];");
-            Assert.AreEqual(ClockToString(a2), "[{a,2,[]}],[{b,1,[v3]}],[];");
-            Assert.AreEqual(ClockToString(a3), "[{a,2,[v2]}],[{b,1,[v4]}],[];");
-            Assert.AreEqual(ClockToString(a4), "[{a,3,[v5][v2]}],[];");     //little change to string because i don`t want change ClockToString :)
+            Assert.AreEqual( "[[\"a\",1,[\"v1\"]],[]]", JsonSerializer.Serialize(ClockToList(a0)));
+            Assert.AreEqual( "[[\"a\",2,[\"v2\"]],[]]", JsonSerializer.Serialize(ClockToList(a1)));
+            Assert.AreEqual("[[\"a\",2,[]],[\"b\",1,[\"v3\"]],[]]", JsonSerializer.Serialize(ClockToList(a2)));
+            Assert.AreEqual("[[\"a\",2,[\"v2\"]],[\"b\",1,[\"v4\"]],[]]", JsonSerializer.Serialize(ClockToList(a3)));
+            Assert.AreEqual("[[\"a\",3,[\"v5\",\"v2\"]],[]]", JsonSerializer.Serialize(ClockToList(a4)));
         }
 
         [TestMethod()]

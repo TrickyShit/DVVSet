@@ -6,6 +6,7 @@ namespace LUC.DVVSet
     /// <summary>
     /// Constructs a Vector value
     /// </summary>
+    [Serializable]
     public class Vector //[{id(), counter()}, {values()}}].
     {
         /// <summary>
@@ -55,13 +56,6 @@ namespace LUC.DVVSet
         //           EqualityComparer<List<string>>.Default.Equals(Values, vector.Values);
         //}
 
-#pragma warning disable CS1591 // Отсутствует комментарий XML для открытого видимого типа или члена
-        public override Int32 GetHashCode()
-#pragma warning restore CS1591 // Отсутствует комментарий XML для открытого видимого типа или члена
-        {
-            return HashCode.Combine(Counter, Values);
-        }
-
         /// <summary>
         /// Adds single entry to Entries
         /// </summary>
@@ -69,7 +63,7 @@ namespace LUC.DVVSet
         /// <param name="id"></param>
         /// <param name="counter"></param>
         /// <param name="values"></param>
-        protected static void AddEntries(SortedList<String, Vector> entries, String id ="", Int32 counter =0, List<String> values=null)
+        protected static void AddEntries(SortedList<String, Vector> entries, String id = "", Int32 counter = 0, List<String> values = null)
         {
             var vector = new Vector
             {
