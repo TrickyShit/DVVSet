@@ -89,39 +89,6 @@
             <param name="version"></param>
             <returns></returns>
         </member>
-        <member name="T:LUC.DVVSet.ClockToList">
-            <summary>
-            This class needed for transform Clock to list of objects.
-            </summary>
-        </member>
-        <member name="P:LUC.DVVSet.ClockToList.Key">
-            <summary>
-            ID of clock
-            </summary>
-        </member>
-        <member name="P:LUC.DVVSet.ClockToList.Counter">
-            <summary>
-            Logical "tick" of clock, counter
-            </summary>
-        </member>
-        <member name="P:LUC.DVVSet.ClockToList.Values">
-            <summary>
-            List of values
-            </summary>
-        </member>
-        <member name="M:LUC.DVVSet.ClockToList.#ctor(System.String,System.Int32,System.Collections.Generic.List{System.String})">
-            <summary>
-            Makes a new exemplar of ClockToList with prepared values
-            </summary>
-            <param name="key"></param>
-            <param name="counter"></param>
-            <param name="values"></param>
-        </member>
-        <member name="M:LUC.DVVSet.ClockToList.#ctor">
-            <summary>
-            Makes a new exemplar of ClockToList
-            </summary>
-        </member>
         <member name="T:LUC.DVVSet.Dvvdotnet">
             <summary>
             Methods for work with DVVSet

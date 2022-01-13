@@ -152,8 +152,6 @@ namespace LUC.DVVSet
                         result += "}],";
                     else
                         result += "]],";
-                    //if (clock.ClockValues.Any()) result += "[" + clock.ClockValues[count] + "];";
-                    //else result+="[];";
                     count++;
                 }
             }
@@ -192,33 +190,45 @@ namespace LUC.DVVSet
                 clock = clocks as Clock;
             }
 
+            var fin_result = new List<Object>();
+
             if (clock.Entries.Count > 0)
             {
-                //var listvalue = new ClockToList();
                 foreach (var keyvalue in clock.Entries)
                 {
+                    Int32 timestamp = 0;
+                    if (keyvalue.Value.Values.Any())
+                    {
+                        timestamp = int.Parse(keyvalue.Value.Values[0]);
+                    }
+
                     var listvalue = new List<Object>
                     {
                         keyvalue.Key,
-                        keyvalue.Value.Counter,
-                        keyvalue.Value.Values
+                        keyvalue.Value.Counter
                     };
+
+                    if (timestamp > 0)
+                        listvalue.Add(new List<Object> { timestamp });
+                    else
+                        listvalue.Add(keyvalue.Value.Values);
+
                     result.Add(listvalue);
-                    //if (keyvalue.Value.Values.Count == 0)
-                    //    result.Add(new List<String>());
-                    //else
-                    //    result.Add(keyvalue.Value.Values);
                 }
+                fin_result.Add(result);
             }
             else
             {
-                result.Add(new List<String>());
+                result.Add(new List<Object>());
+                fin_result.Add(result);
             }
             if (clock.ClockValues.Any())
-                result.Add(clock.ClockValues);
+                fin_result.Add(clock.ClockValues);
             else
-                result.Add(new List<String>());
-            return result;
+                fin_result.Add(new List<Object>());
+
+
+            return fin_result;
         }
 
         /// <summary>

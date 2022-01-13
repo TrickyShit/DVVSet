@@ -24,7 +24,7 @@ Original code: https://github.com/ricardobcl/Dotted-Version-Vectors</Description
     <UserSecretsId>f4f95791-756f-40ac-8da5-4a77026e5226</UserSecretsId>
     <AssemblyVersion>1.0.1.0</AssemblyVersion>
     <FileVersion>1.0.1.0</FileVersion>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <PackageReleaseNotes>Improved ClockToString and StringToClock</PackageReleaseNotes>
     <RepositoryType>Library</RepositoryType>
     <PackageIcon>simply-midnight-black-wall-clocks.jpg</PackageIcon>
