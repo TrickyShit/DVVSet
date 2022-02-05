@@ -66,3 +66,4 @@ bld/
 .vs/DVVSet/v16/TestStore/0/002.testlog
 .vs/DVVSet/v16/TestStore/0/testlog.manifest
 *.nuspec
+*.nupkg

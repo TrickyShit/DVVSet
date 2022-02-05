@@ -110,12 +110,19 @@ namespace LUC.DVVSet
             var values = new List<String>();
             var count = count1 > count2 ? count1 + 1 : count2 + 1;
             Int32 comparison;
-            switch (values1.Count)
+
+            if (values1.Count == 0 && values2.Count == 0)
             {
-                case 0:
+                //Do nothing; result values are empty
+            }
+            else
+            {
+                if (values1.Count == 0)
+                {
                     values.Add(values2[0]);
-                    break;
-                default:
+                }
+                else
+                {
                     if (values2.Count == 0)
                     {
                         values.Add(values1[0]);
@@ -138,8 +145,7 @@ namespace LUC.DVVSet
                             values.Add(values1[0]);
                         }
                     }
-
-                    break;
+                }
             }
             var value = new Vector(count, values);
             var result = new KeyValuePair<String, Vector>(id, value);

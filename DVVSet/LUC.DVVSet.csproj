@@ -18,14 +18,14 @@ Original code: https://github.com/ricardobcl/Dotted-Version-Vectors</Description
     <PackageProjectUrl />
     <RepositoryUrl>https://github.com/TrickyShit/DVVSet</RepositoryUrl>
     <Copyright></Copyright>
-    <NeutralLanguage></NeutralLanguage>
+    <NeutralLanguage>en</NeutralLanguage>
     <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU</Platforms>
     <UserSecretsId>f4f95791-756f-40ac-8da5-4a77026e5226</UserSecretsId>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
-    <Version>1.0.2</Version>
-    <PackageReleaseNotes>Improved ClockToString and StringToClock</PackageReleaseNotes>
+    <AssemblyVersion>1.0.3.6</AssemblyVersion>
+    <FileVersion>1.0.3.6</FileVersion>
+    <Version>1.0.3.6</Version>
+    <PackageReleaseNotes>Minor fixes</PackageReleaseNotes>
     <RepositoryType>Library</RepositoryType>
     <PackageIcon>simply-midnight-black-wall-clocks.jpg</PackageIcon>
     <PackageIconUrl />
@@ -41,6 +41,7 @@ Original code: https://github.com/ricardobcl/Dotted-Version-Vectors</Description
     <WarningsAsErrors />
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DocumentationFile>E:\source\repos\DVVSet\DVVSet\LUC.DVVSet.xml</DocumentationFile>
+    <Optimize>true</Optimize>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -48,6 +49,12 @@ Original code: https://github.com/ricardobcl/Dotted-Version-Vectors</Description
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningsAsErrors />
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn />
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors />
   </PropertyGroup>
 
   <ItemGroup>
